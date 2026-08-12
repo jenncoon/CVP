@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVP Business Simulation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.cdnfonts.com/css/opendyslexic');
+
+/* ── DYSLEXIA-FRIENDLY MODE ── */
+/* Applied when <html> has class="dyslexic" */
+.dyslexic body{
+  font-family:'OpenDyslexic',Arial,sans-serif!important;
+  font-size:17px!important;
+  line-height:1.8!important;
+  letter-spacing:.04em!important;
+  word-spacing:.16em!important;
+}
+.dyslexic .ii h1,
+.dyslexic .htitle,
+.dyslexic .rtitle,
+.dyslexic .dc h4,
+.dyslexic .fw h2,
+.dyslexic .fsec h3,
+.dyslexic .mbox h2,
+.dyslexic .rw h2,
+.dyslexic .bizname,
+.dyslexic .fbt,
+.dyslexic .opt-card .opt-title,
+.dyslexic .pill,
+.dyslexic .sc2 .sv,
+.dyslexic .nc .nv,
+.dyslexic .fbox h5,
+.dyslexic .chip,
+.dyslexic .sb h3{
+  font-family:'OpenDyslexic',Arial,sans-serif!important;
+  letter-spacing:.03em!important;
+}
+.dyslexic .scenario-p,
+.dyslexic .rdesc,
+.dyslexic .ig label,
+.dyslexic .ig input,
+.dyslexic .ig select,
+.dyslexic .mc-opt,
+.dyslexic .fbb,
+.dyslexic .fl,
+.dyslexic .dir-line,
+.dyslexic .fnote,
+.dyslexic .fsub,
+.dyslexic .ftbl td,
+.dyslexic .mr,
+.dyslexic .opt-card .opt-detail,
+.dyslexic .ssbox p,
+.dyslexic .sc2 .sl,
+.dyslexic .rmsg{
+  font-family:'OpenDyslexic',Arial,sans-serif!important;
+  line-height:1.9!important;
+  letter-spacing:.03em!important;
+}
+/* Wider paragraph max-width for easier tracking */
+.dyslexic .rdesc{max-width:580px!important}
+.dyslexic .scenario-p{font-size:1.2rem!important}
+/* Slightly larger input text */
+.dyslexic .ig input,.dyslexic .ig select{font-size:1.1rem!important;padding:14px!important}
+/* More breathing room in decision card */
+.dyslexic .dc{padding:32px!important}
+.dyslexic .irow{gap:20px!important;margin-bottom:24px!important}
+/* MC options: more padding, bigger text */
+.dyslexic .mc-opt{padding:18px 20px!important;font-size:1.15rem!important;line-height:1.8!important}
+/* Underline links, not relying on color alone */
+.dyslexic a{text-decoration:underline!important}
+/* No italics — hard to read with dyslexia */
+.dyslexic em,.dyslexic i{font-style:normal!important}
+/* Reduce justified text — use left-align only */
+.dyslexic p,.dyslexic .fbb,.dyslexic .scenario-p,.dyslexic .rdesc{text-align:left!important}
+/* Paragraph spacing */
+.dyslexic .fbb br{display:block;margin-bottom:.4em;content:''}
+/* Slightly increased border radius on inputs for softer visual */
+.dyslexic .ig input,.dyslexic .ig select,.dyslexic .ninput{border-radius:12px!important}
+/* Higher contrast focus ring in dyslexic mode */
+.dyslexic :focus{outline:4px solid var(--acc)!important;outline-offset:4px!important}
+
+:root{
+  /* Soft dark navy/slate — noticeably lighter than before */
+  --bg:#1e2640;--sur:#28304f;--card:#323d62;
+  --acc:#f5c542;--a2:#3ecfb2;--red:#ff6b6b;
+  --tx:#f0f2f8;--mu:#b8bdd4;--bd:#424f7a;--ok:#4ade80;
+  --label:#c8ccdc;--body:#dde1f0;
+}
+/* Skip link */
+.skip-link{position:absolute;top:-100px;left:16px;z-index:9999;background:var(--acc);color:#111;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;padding:10px 20px;border-radius:0 0 8px 8px;text-decoration:none;transition:top .15s}
+.skip-link:focus{top:0}
+/* Screen-reader only utility */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){
+  .anim{animation:none!important}
+  .dot,.btn,.scc,.floatbtn,.btnout{transition:none!important}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;font-size:16px;line-height:1.5}
+.screen{display:none;min-height:100vh}.screen.active{display:flex;flex-direction:column}
+
+/* DYSLEXIA TOGGLE BUTTON */
+.dys-toggle{background:var(--card);border:2px solid var(--bd);color:var(--label);border-radius:8px;padding:6px 14px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:border-color .2s,color .2s,background .2s;white-space:nowrap}
+.dys-toggle:hover{border-color:var(--a2);color:var(--a2)}
+.dys-toggle:focus{outline:3px solid var(--acc);outline-offset:3px}
+.dys-toggle.on{border-color:var(--a2);color:var(--a2);background:rgba(62,207,178,.12)}
+/* Floating dyslexia toggle for intro/formula screens */
+.dys-float{position:fixed;top:16px;right:16px;z-index:300;background:var(--card);border:2px solid var(--bd);color:var(--label);border-radius:8px;padding:8px 16px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:border-color .2s,color .2s;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.dys-float:hover{border-color:var(--a2);color:var(--a2)}
+.dys-float:focus{outline:3px solid var(--acc);outline-offset:3px}
+.dys-float.on{border-color:var(--a2);color:var(--a2);background:rgba(62,207,178,.12)}
+
+/* HEADER */
+.hdr{background:var(--sur);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.htitle{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--acc);letter-spacing:.04em}
+.hchips{display:flex;gap:16px;align-items:center}
+.chip{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 14px;font-size:.9rem;font-weight:500}
+.chip span{color:var(--acc);font-weight:700}
+
+/* INTRO */
+#intro{justify-content:center;align-items:center;padding:40px 20px}
+.ii{max-width:680px;width:100%;text-align:center}
+.ii h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;margin-bottom:16px}
+.ii h1 em{font-style:normal;color:var(--acc)}
+.ii>p{color:var(--body);font-size:1.1rem;line-height:1.7;margin-bottom:28px}
+.nlabel{display:block;font-size:1.05rem;color:var(--tx);margin-bottom:8px;font-weight:600;text-align:left}
+.ninput{width:100%;background:var(--card);border:2px solid var(--bd);color:var(--tx);border-radius:10px;padding:13px 16px;font-size:1.05rem;font-family:'DM Sans',sans-serif;transition:border-color .2s;margin-bottom:28px}
+.ninput:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(245,197,66,.2)}
+.sclabel{font-family:'Syne',sans-serif;font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;color:var(--label);margin-bottom:14px;text-align:left;font-weight:700}
+.scgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:28px}
+.scc{background:var(--card);border:2px solid var(--bd);border-radius:14px;padding:20px 14px;cursor:pointer;transition:all .2s;text-align:center}
+.scc:hover{border-color:rgba(245,197,66,.6);background:rgba(245,197,66,.05)}
+.scc.sel{border-color:var(--acc);background:rgba(245,197,66,.10)}
+.scc:focus{outline:3px solid var(--acc);outline-offset:2px}
+.scc .ico{font-size:2.2rem;margin-bottom:10px}
+.scc .sn{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:6px;color:var(--tx)}
+.scc .sd{color:var(--label);font-size:.85rem;line-height:1.4}
+
+/* BUTTONS */
+.btn{background:var(--acc);color:#111;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;border:none;border-radius:10px;padding:14px 36px;cursor:pointer;transition:opacity .2s,transform .15s}
+.btn:hover{opacity:.9;transform:translateY(-1px)}.btn:focus{outline:3px solid var(--acc);outline-offset:3px}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btnout{background:transparent;border:2px solid var(--acc);color:var(--acc);border-radius:10px;padding:12px 28px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;transition:background .2s}
+.btnout:hover{background:rgba(245,197,66,.1)}.btnout:focus{outline:3px solid var(--acc);outline-offset:3px}
+
+/* FORMULA SCREEN */
+#formulas{justify-content:flex-start;align-items:center;padding:40px 20px}
+.fw{max-width:780px;width:100%}
+.fw h2{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:8px}
+.fsub{color:var(--body);margin-bottom:28px;font-size:1.05rem;line-height:1.65}
+.fnote{background:rgba(245,197,66,.08);border:1px solid rgba(245,197,66,.25);border-radius:10px;padding:16px 18px;font-size:1rem;color:var(--tx);line-height:1.7;margin-bottom:16px}
+.fnote strong{color:var(--acc)}
+.fsec{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:22px;margin-bottom:14px}
+.fsec h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--a2);margin-bottom:14px}
+.ftbl{width:100%;border-collapse:collapse}
+.ftbl tr{border-bottom:1px solid var(--bd)}.ftbl tr:last-child{border-bottom:none}
+.ftbl td{padding:10px 6px;font-size:.95rem;vertical-align:top;line-height:1.5}
+.ftbl td:first-child{color:var(--label);width:44%;padding-right:14px;font-weight:500}
+.ftbl td:last-child{font-family:monospace;font-size:.92rem;background:rgba(255,255,255,.04);border-radius:4px;padding:8px 10px;color:var(--tx)}
+.fbtns{display:flex;gap:14px;justify-content:center;margin-top:28px;flex-wrap:wrap;padding-bottom:40px}
+
+/* FLOAT/MODAL */
+.floatbtn{position:fixed;bottom:24px;right:24px;z-index:200;background:var(--a2);color:#0f1117;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;border:none;border-radius:50px;padding:12px 22px;cursor:pointer;box-shadow:0 4px 20px rgba(62,207,178,.35);transition:transform .2s;display:none}
+.floatbtn:hover{transform:translateY(-2px)}.floatbtn:focus{outline:3px solid #fff;outline-offset:3px}
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;justify-content:center;align-items:flex-start;padding:30px 16px;overflow-y:auto}
+.mbg.open{display:flex}
+.mbox{background:var(--sur);border:1px solid var(--bd);border-radius:20px;max-width:720px;width:100%;padding:32px;position:relative}
+.mx{position:absolute;top:16px;right:18px;background:var(--card);border:1px solid var(--bd);color:var(--label);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.9rem;font-weight:600}
+.mx:hover{color:var(--tx)}.mx:focus{outline:3px solid var(--acc);outline-offset:2px}
+.mbox h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:16px;color:var(--acc)}
+
+/* GAME LAYOUT */
+#game{flex-direction:column}
+.gbody{display:grid;grid-template-columns:290px 1fr;flex:1;min-height:calc(100vh - 60px)}
+.sb{background:var(--sur);border-right:1px solid var(--bd);padding:24px 18px;display:flex;flex-direction:column;gap:18px;overflow-y:auto}
+.sb h3{font-family:'Syne',sans-serif;font-size:.875rem;text-transform:uppercase;letter-spacing:.1em;color:var(--label);margin-bottom:4px;font-weight:700}
+.bizcard{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--bd)}
+.bizname{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:var(--acc);margin-bottom:2px}
+.biztype{color:var(--label);font-size:.9rem}
+.met{background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--bd)}
+.mr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd);font-size:.9rem}
+.mr:last-child{border-bottom:none}
+.mr .lb{color:var(--label);font-weight:500}.mr .vl{font-weight:700;font-size:.9rem}
+.vl.g{color:var(--ok)}.vl.r{color:var(--red)}.vl.w{color:var(--acc)}
+.rdots{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+/* Dots: 44x44px touch target with 16px visual circle inside */
+.dot{width:44px;height:44px;border-radius:50%;border:2px solid transparent;cursor:default;
+  transition:background .25s,transform .15s,box-shadow .15s;flex-shrink:0;padding:0;
+  background:transparent;display:flex;align-items:center;justify-content:center;position:relative}
+.dot::after{content:'';width:16px;height:16px;border-radius:50%;background:var(--bd);
+  display:block;transition:background .25s,box-shadow .15s}
+.dot.dn{cursor:pointer;border-color:transparent}
+.dot.dn::after{background:var(--a2)}
+.dot.dn:hover::after{box-shadow:0 0 0 6px rgba(62,207,178,.22);transform:scale(1.25)}
+.dot.dn:focus{outline:3px solid var(--a2);outline-offset:2px}
+.dot.cu::after{background:var(--acc)}
+.dot-hint{font-size:.875rem;color:var(--label);margin-top:4px;line-height:1.4;min-height:1.2em}
+
+/* REVIEW BANNER */
+.review-banner{background:rgba(62,207,178,.1);border:1.5px solid rgba(62,207,178,.4);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:1.05rem;color:var(--a2);font-weight:600}
+.review-banner .ri{font-size:1.4rem}
+
+/* MAIN */
+.ma{padding:28px;overflow-y:auto;display:flex;flex-direction:column;gap:20px}
+.rhd{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}
+.rtag{font-family:'Syne',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--a2);font-weight:700}
+.rtitle{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin:4px 0 10px;color:var(--tx)}
+.rdesc{color:var(--body);font-size:1.35rem;line-height:1.65;max-width:640px}
+.pill{display:inline-flex;align-items:center;background:rgba(62,207,178,.12);color:var(--a2);border:1px solid rgba(62,207,178,.3);border-radius:20px;padding:5px 14px;font-size:.85rem;font-weight:600;white-space:nowrap}
+
+/* FORMULA REMINDER */
+.fbox{background:rgba(245,197,66,.07);border:1px solid rgba(245,197,66,.22);border-radius:12px;padding:18px;margin-bottom:18px}
+.fbox h5{font-family:'Syne',sans-serif;font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);margin-bottom:12px;font-weight:700}
+.fl{font-size:1.1rem;color:var(--tx);margin:6px 0;line-height:1.5}
+.fl code{background:rgba(255,255,255,.08);border-radius:4px;padding:4px 8px;font-family:monospace;font-size:1.05rem;color:var(--tx)}
+
+/* LIVE NUMBERS */
+.nums{background:var(--sur);border:1px solid var(--bd);border-radius:12px;padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:18px}
+.nc{text-align:center}
+.nc .nl{font-size:.85rem;color:var(--label);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-weight:600}
+.nc .nv{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--tx)}
+.nc .nv.w{color:var(--acc)}
+
+/* DECISION CARD */
+.dc{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:28px}
+.dc h4{font-family:'Syne',sans-serif;font-weight:800;margin-bottom:14px;font-size:1.35rem;color:var(--tx)}
+.scenario-p{background:rgba(62,207,178,.07);border-left:4px solid var(--a2);border-radius:0 8px 8px 0;padding:16px 18px;margin-bottom:22px;font-size:1.35rem;color:var(--tx);line-height:1.7}
+.scenario-p strong{color:var(--acc);font-weight:700}
+.dir-line{font-size:1.15rem;color:var(--label);margin-bottom:20px;font-weight:600;line-height:1.5}
+
+/* INPUT GROUPS */
+.irow{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:20px}
+.ig{display:flex;flex-direction:column;gap:8px;flex:1;min-width:200px}
+.ig label{font-size:1.15rem;color:var(--tx);font-weight:600;line-height:1.4}
+.ig input,.ig select{background:var(--sur);border:2px solid var(--bd);color:var(--tx);border-radius:8px;padding:12px 14px;font-size:1.05rem;font-family:'DM Sans',sans-serif;transition:border-color .2s;min-height:48px}
+.ig input:focus,.ig select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(245,197,66,.2)}
+.ig select option{background:var(--card);color:var(--tx)}
+
+/* MULTIPLE CHOICE */
+.mc-group{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.mc-opt{display:flex;align-items:center;gap:14px;background:var(--sur);border:2px solid var(--bd);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s,background .2s;font-size:1.1rem;color:var(--tx);font-weight:500}
+.mc-opt:hover{border-color:rgba(245,197,66,.5);background:rgba(245,197,66,.04)}
+.mc-opt.sel{border-color:var(--acc);background:rgba(245,197,66,.08);color:var(--tx)}
+.mc-opt input[type=radio]{accent-color:var(--acc);width:18px;height:18px;flex-shrink:0}
+.mc-opt.correct-reveal{border-color:var(--ok)!important;background:rgba(74,222,128,.08)!important}
+.mc-opt.wrong-reveal{border-color:var(--red)!important;background:rgba(255,92,92,.06)!important}
+
+/* ── BEP CHART ── */
+.chart-wrap{background:var(--sur);border:1px solid var(--bd);border-radius:14px;padding:20px 20px 12px;margin-bottom:20px}
+.chart-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--tx);margin-bottom:4px}
+.chart-sub{font-size:.9rem;color:var(--label);margin-bottom:14px;line-height:1.4}
+.chart-canvas-wrap{position:relative;width:100%;height:260px}
+.chart-canvas-wrap canvas{width:100%!important;height:260px!important}
+
+/* slider */
+.slider-wrap{margin-top:14px;padding:0 4px}
+.slider-label{display:flex;justify-content:space-between;align-items:center;font-size:1rem;margin-bottom:8px}
+.slider-label .sl-val{font-family:'Syne',sans-serif;font-weight:700;font-size:1.15rem}
+.slider-label .sl-val.profit{color:var(--ok)}.slider-label .sl-val.loss{color:var(--red)}.slider-label .sl-val.even{color:var(--acc)}
+input[type=range].bep-slider{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:4px;background:var(--bd);outline:none;cursor:pointer}
+input[type=range].bep-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--acc);cursor:pointer;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+input[type=range].bep-slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--acc);cursor:pointer;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.slider-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.slider-stat{background:var(--card);border-radius:8px;padding:10px 12px;text-align:center}
+.slider-stat .ss-l{font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--label);font-weight:600;margin-bottom:3px}
+.slider-stat .ss-v{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem}
+.chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:.88rem}
+.chart-legend span{display:flex;align-items:center;gap:6px;color:var(--label)}
+.legend-dot{width:12px;height:3px;border-radius:2px;display:inline-block}
+
+/* ROUND 5 */
+.opt-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.opt-card{background:var(--sur);border:2px solid var(--bd);border-radius:10px;padding:18px}
+.opt-card .opt-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:8px}
+.opt-card .opt-detail{color:var(--label);font-size:1rem;line-height:1.6}
+
+/* FEEDBACK */
+.fb{border-radius:16px;padding:26px;border:1px solid}
+.fb.ok{background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.35)}
+.fb.no{background:rgba(255,92,92,.08);border-color:rgba(255,92,92,.35)}
+.fbh{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.fbi{font-size:1.6rem}.fbt{font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem;color:var(--tx)}
+.fbb{font-size:1.1rem;line-height:1.8;color:var(--tx)}.fbb strong{color:var(--acc)}
+.fbm{background:rgba(0,0,0,.35);border-radius:8px;padding:14px 18px;margin:14px 0;font-family:monospace;font-size:1rem;line-height:1.9;color:var(--tx)}
+
+/* READ-ONLY review */
+.ro-wrap{display:flex;flex-direction:column;gap:8px;flex:1;min-width:200px}
+.ro-wrap label{font-size:1.15rem;color:var(--tx);font-weight:600;line-height:1.4}
+.ro-val{background:rgba(255,255,255,.04);border:2px solid var(--bd);color:var(--label);border-radius:8px;padding:12px 14px;font-size:1.05rem;min-height:48px;display:flex;align-items:center}
+
+/* RESULTS */
+#results{justify-content:center;align-items:center;padding:40px 20px}
+.rw{max-width:680px;width:100%;text-align:center}
+.rbn{font-family:'Syne',sans-serif;font-size:1rem;color:var(--label);margin-bottom:6px}
+.rbn strong{color:var(--acc);font-size:1.25rem}
+.ring{width:140px;height:140px;border-radius:50%;border:6px solid var(--acc);display:flex;flex-direction:column;justify-content:center;align-items:center;margin:16px auto 24px}
+.ring .rnum{font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;color:var(--acc)}
+.ring .rlbl{font-size:.8rem;color:var(--label)}
+.rw h2{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:10px}
+.rmsg{color:var(--body);line-height:1.7;margin-bottom:22px;font-size:1.05rem}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.sc2{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:left}
+.sc2 .sl{font-size:.85rem;color:var(--label);margin-bottom:5px;font-weight:600}
+.sc2 .sv{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem}
+.ssbox{background:rgba(62,207,178,.07);border:1.5px dashed rgba(62,207,178,.4);border-radius:14px;padding:18px 22px;margin-bottom:24px;text-align:left}
+.ssbox h4{font-family:'Syne',sans-serif;font-weight:700;color:var(--a2);margin-bottom:8px;font-size:1rem}
+.ssbox p{font-size:.95rem;color:var(--tx);line-height:1.75}
+.kbd{display:inline-block;background:var(--card);border:1px solid var(--bd);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:.85rem;color:var(--acc);margin:0 2px}
+.rbtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .35s ease both}
+@media(max-width:700px){
+  .gbody{grid-template-columns:1fr}.sb{border-right:none;border-bottom:1px solid var(--bd)}
+  .sgrid,.opt-cards{grid-template-columns:1fr}.floatbtn{bottom:16px;right:16px}
+  .rdesc,.scenario-p{font-size:1.1rem}.ig label,.ro-wrap label,.dir-line{font-size:1rem}
+  .dc h4{font-size:1.15rem}.slider-stat-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#ma">Skip to main content</a>
+<button class="dys-float" id="dys-float-btn" onclick="toggleDys()" aria-pressed="false" title="Toggle dyslexia-friendly font">&#128273; Dyslexia Font</button>
+
+<!-- ======== INTRO ======== -->
+<div id="intro" class="screen active">
+<div class="ii anim" style="padding:40px 20px">
+  <h1>Run a Business.<br>Master <em>CVP</em>.</h1>
+  <p>Make real pricing and volume decisions for a small business over 5 rounds. Each round covers a core Cost-Volume-Profit concept. Try all four businesses and screenshot each results page!</p>
+  <label class="nlabel" for="sname">&#128100; Your Full Name &mdash; required for submission</label>
+  <input type="text" id="sname" class="ninput" placeholder="First Last" oninput="chk()" aria-required="true">
+  <div class="sclabel" id="biz-group-label">Choose Your Business</div>
+  <div class="scgrid" role="radiogroup" aria-labelledby="biz-group-label">
+    <div class="scc" role="radio" aria-checked="false" tabindex="0" data-id="taco" onclick="pick(this)" onkeydown="if(event.key==='Enter'||event.key===' '){pick(this);}if(event.key==='ArrowRight'||event.key==='ArrowDown'){event.preventDefault();focusNextBiz(this,1);}if(event.key==='ArrowLeft'||event.key==='ArrowUp'){event.preventDefault();focusNextBiz(this,-1);}">
+      <div class="ico" aria-hidden="true">&#127790;</div><div class="sn">Rosita's Taco Truck</div><div class="sd">Price $9 &bull; VC $3.50 &bull; FC $2,800/mo</div>
+    </div>
+    <div class="scc" role="radio" aria-checked="false" tabindex="-1" data-id="tshirt" onclick="pick(this)" onkeydown="if(event.key==='Enter'||event.key===' '){pick(this);}if(event.key==='ArrowRight'||event.key==='ArrowDown'){event.preventDefault();focusNextBiz(this,1);}if(event.key==='ArrowLeft'||event.key==='ArrowUp'){event.preventDefault();focusNextBiz(this,-1);}">
+      <div class="ico" aria-hidden="true">&#128085;</div><div class="sn">Pixel &amp; Press Tees</div><div class="sd">Price $25 &bull; VC $9 &bull; FC $3,500/mo</div>
+    </div>
+    <div class="scc" role="radio" aria-checked="false" tabindex="-1" data-id="coffee" onclick="pick(this)" onkeydown="if(event.key==='Enter'||event.key===' '){pick(this);}if(event.key==='ArrowRight'||event.key==='ArrowDown'){event.preventDefault();focusNextBiz(this,1);}if(event.key==='ArrowLeft'||event.key==='ArrowUp'){event.preventDefault();focusNextBiz(this,-1);}">
+      <div class="ico" aria-hidden="true">&#9749;</div><div class="sn">Grounds &amp; Glory Kiosk</div><div class="sd">Price $5.50 &bull; VC $1.75 &bull; FC $2,200/mo</div>
+    </div>
+    <div class="scc" role="radio" aria-checked="false" tabindex="-1" data-id="candle" onclick="pick(this)" onkeydown="if(event.key==='Enter'||event.key===' '){pick(this);}if(event.key==='ArrowRight'||event.key==='ArrowDown'){event.preventDefault();focusNextBiz(this,1);}if(event.key==='ArrowLeft'||event.key==='ArrowUp'){event.preventDefault();focusNextBiz(this,-1);}">
+      <div class="ico" aria-hidden="true">&#128305;</div><div class="sn">Ember &amp; Wax Co.</div><div class="sd">Price $18 &bull; VC $6 &bull; FC $1,800/mo</div>
+    </div>
+  </div>
+  <button class="btn" id="gobtn" disabled onclick="goFml()">Review Formula Sheet &#8594;</button>
+</div>
+</div>
+
+<!-- ======== FORMULAS ======== -->
+<div id="formulas" class="screen">
+<div style="display:flex;justify-content:center;padding:40px 20px">
+<div class="fw anim">
+  <div style="display:inline-block;background:rgba(245,197,66,.15);color:var(--acc);border:1px solid rgba(245,197,66,.35);border-radius:20px;padding:5px 18px;font-size:.85rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px">Reference Sheet</div>
+  <h2>&#128208; CVP Formula Sheet</h2>
+  <p class="fsub">Review these formulas before you start. You can reopen this sheet at any time during the simulation by clicking the <strong style="color:var(--a2)">&#128208; Formulas</strong> button in the bottom-right corner.</p>
+  <div class="fnote"><strong>Key Variables:</strong>&nbsp; <strong>P</strong> = Selling Price per unit &nbsp;|&nbsp; <strong>VC</strong> = Variable Cost per unit &nbsp;|&nbsp; <strong>FC</strong> = Total Fixed Costs &nbsp;|&nbsp; <strong>Q</strong> = Units Sold &nbsp;|&nbsp; <strong>CM</strong> = Contribution Margin &nbsp;|&nbsp; <strong>NOI</strong> = Net Operating Income</div>
+  <div class="fsec"><h3>&#128202; Contribution Margin</h3>
+    <table class="ftbl" aria-label="Contribution Margin formulas"><caption class="sr-only">Contribution Margin formulas</caption><tr><td>CM per Unit</td><td>CM = P &minus; VC</td></tr><tr><td>CM Ratio</td><td>CM Ratio = CM per Unit &divide; P</td></tr><tr><td>Total CM</td><td>Total CM = Q &times; CM per Unit</td></tr><tr><td>VC Ratio</td><td>VC Ratio = 1 &minus; CM Ratio</td></tr></table></div>
+  <div class="fsec"><h3>&#9878; Break-Even Point</h3>
+    <table class="ftbl" aria-label="Break-Even Point formulas"><caption class="sr-only">Break-Even Point formulas</caption><tr><td>Break-Even (units)</td><td>BEP = FC &divide; CM per Unit</td></tr><tr><td>Break-Even (sales $)</td><td>BEP = FC &divide; CM Ratio</td></tr><tr><td>NOI at any volume</td><td>NOI = (Q &times; CM per Unit) &minus; FC</td></tr><tr><td>Using CM Ratio</td><td>NOI = (Sales $ &times; CM Ratio) &minus; FC</td></tr></table></div>
+  <div class="fsec"><h3>&#127919; Target Profit</h3>
+    <table class="ftbl" aria-label="Target Profit formulas"><caption class="sr-only">Target Profit formulas</caption><tr><td>Required units</td><td>Q = (FC + Target Profit) &divide; CM per Unit</td></tr><tr><td>Required sales $</td><td>Sales $ = (FC + Target Profit) &divide; CM Ratio</td></tr></table></div>
+  <div class="fsec"><h3>&#128737; Margin of Safety</h3>
+    <table class="ftbl" aria-label="Margin of Safety formulas"><caption class="sr-only">Margin of Safety formulas</caption><tr><td>MOS in Units</td><td>MOS = Actual Units &minus; BEP Units</td></tr><tr><td>MOS in Dollars</td><td>MOS $ = Actual Sales $ &minus; BEP Sales $</td></tr><tr><td>MOS Percentage</td><td>MOS% = MOS Units &divide; Actual Units &times; 100</td></tr><tr><td>Interpretation</td><td>Higher MOS% = more cushion before losses begin</td></tr></table></div>
+  <div class="fsec"><h3>&#128295; Operating Leverage</h3>
+    <table class="ftbl" aria-label="Operating Leverage formulas"><caption class="sr-only">Operating Leverage formulas</caption><tr><td>Degree of Operating Leverage</td><td>DOL = Total CM &divide; Net Operating Income</td></tr><tr><td>Profit sensitivity</td><td>% Change in NOI = % Change in Sales &times; DOL</td></tr><tr><td>High DOL</td><td>More fixed costs &rarr; bigger profit swings</td></tr><tr><td>Low DOL</td><td>More variable costs &rarr; stable profit, lower risk</td></tr></table></div>
+  <div class="fnote" style="margin-top:4px">&#128161; <strong>Tip:</strong> During the simulation, your business&rsquo;s Price, VC, FC, CM, and BEP are always shown in the left sidebar.</div>
+  <div class="fbtns">
+    <button class="btnout" onclick="showScreen('intro')">&#8592; Back to Setup</button>
+    <button class="btn" onclick="startGame()">Start Simulation &#8594;</button>
+  </div>
+</div></div></div>
+
+<!-- ======== GAME ======== -->
+<div id="game" class="screen">
+<div class="hdr">
+  <div class="htitle">&#128202; CVP Sim</div>
+  <div class="hchips">
+    <div class="chip">Round <span id="hr">1</span>/5</div>
+    <div class="chip">Score <span id="hs">0</span></div>
+    <div class="chip">Profit <span id="hp">$0</span></div>
+    <button class="dys-toggle" id="dys-btn" onclick="toggleDys()" aria-pressed="false" title="Toggle dyslexia-friendly font">&#128273; Dyslexia Font</button>
+  </div>
+</div>
+<div class="gbody">
+  <div class="sb">
+    <div class="bizcard">
+      <div class="bizname" id="sbn">&mdash;</div>
+      <div class="biztype" id="sbt">&mdash;</div>
+      <div style="margin-top:8px;font-size:.88rem;color:var(--label)">Student: <span id="sbstu" style="color:var(--tx);font-weight:600">&mdash;</span></div>
+    </div>
+    <div>
+      <h3>Your Numbers</h3>
+      <div class="met">
+        <div class="mr"><span class="lb">Selling Price</span><span class="vl" id="mp">&mdash;</span></div>
+        <div class="mr"><span class="lb">Variable Cost/unit</span><span class="vl" id="mv">&mdash;</span></div>
+        <div class="mr"><span class="lb">Fixed Costs/month</span><span class="vl" id="mf">&mdash;</span></div>
+        <div class="mr"><span class="lb">CM per unit</span><span class="vl w" id="mcm">&mdash;</span></div>
+        <div class="mr"><span class="lb">CM Ratio</span><span class="vl w" id="mcmr">&mdash;</span></div>
+        <div class="mr"><span class="lb">Break-Even (units)</span><span class="vl" id="mbe">&mdash;</span></div>
+        <div class="mr"><span class="lb">Break-Even ($)</span><span class="vl" id="mbes">&mdash;</span></div>
+        <div class="mr"><span class="lb">Cumulative Profit</span><span class="vl" id="mpr">$0</span></div>
+      </div>
+    </div>
+    <div>
+      <h3>Progress</h3>
+      <div class="rdots" id="rdots" role="group" aria-label="Round progress"></div>
+      <div class="dot-hint" id="dot-hint"></div>
+    </div>
+  </div>
+  <div class="ma" id="ma"></div>
+</div>
+</div>
+
+<button class="floatbtn" id="ffb" onclick="openMod()" aria-label="Open formula sheet">&#128208; Formulas</button>
+
+<div class="mbg" id="fmod" role="dialog" aria-modal="true" aria-label="CVP Formula Sheet">
+<div class="mbox">
+  <button class="mx" onclick="closeMod()" aria-label="Close">&#10005; Close</button>
+  <h2>&#128208; CVP Formula Sheet</h2>
+  <div class="fnote" style="margin-bottom:14px"><strong>Variables:</strong> P=Price &nbsp;|&nbsp; VC=Var Cost/unit &nbsp;|&nbsp; FC=Fixed Costs &nbsp;|&nbsp; Q=Units &nbsp;|&nbsp; CM=Contribution Margin &nbsp;|&nbsp; NOI=Net Operating Income</div>
+  <div class="fsec" style="margin-bottom:10px"><h3>&#128202; CM</h3><table class="ftbl" aria-label="Contribution Margin formulas"><caption class="sr-only">Contribution Margin formulas</caption><tr><td>CM/unit</td><td>P &minus; VC</td></tr><tr><td>CM Ratio</td><td>CM &divide; P</td></tr><tr><td>Total CM</td><td>Q &times; CM</td></tr></table></div>
+  <div class="fsec" style="margin-bottom:10px"><h3>&#9878; Break-Even</h3><table class="ftbl" aria-label="Break-Even formulas"><caption class="sr-only">Break-Even formulas</caption><tr><td>BEP (units)</td><td>FC &divide; CM</td></tr><tr><td>BEP ($)</td><td>FC &divide; CM Ratio</td></tr><tr><td>NOI</td><td>(Q &times; CM) &minus; FC</td></tr></table></div>
+  <div class="fsec" style="margin-bottom:10px"><h3>&#127919; Target Profit</h3><table class="ftbl" aria-label="Target Profit formulas"><caption class="sr-only">Target Profit formulas</caption><tr><td>Required Units</td><td>(FC + Target) &divide; CM</td></tr><tr><td>Required Sales $</td><td>(FC + Target) &divide; CM Ratio</td></tr></table></div>
+  <div class="fsec" style="margin-bottom:10px"><h3>&#128737; Margin of Safety</h3><table class="ftbl" aria-label="Margin of Safety formulas"><caption class="sr-only">Margin of Safety formulas</caption><tr><td>MOS units</td><td>Actual &minus; BEP units</td></tr><tr><td>MOS $</td><td>Actual Sales &minus; BEP Sales</td></tr><tr><td>MOS %</td><td>MOS units &divide; Actual &times; 100</td></tr></table></div>
+  <div class="fsec"><h3>&#128295; Operating Leverage</h3><table class="ftbl" aria-label="Operating Leverage formulas"><caption class="sr-only">Operating Leverage formulas</caption><tr><td>DOL</td><td>Total CM &divide; NOI</td></tr><tr><td>Effect</td><td>% &Delta; NOI = % &Delta; Sales &times; DOL</td></tr></table></div>
+</div>
+</div>
+
+<!-- ======== RESULTS ======== -->
+<div id="results" class="screen">
+<div style="display:flex;justify-content:center;padding:40px 20px">
+<div class="rw anim">
+  <div class="rbn">Results for <strong id="rname">&mdash;</strong></div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;margin:16px 0 8px">
+    <div class="ring"><div class="rnum" id="fscore">0</div><div class="rlbl">/ 500 pts</div></div>
+    <div style="text-align:left">
+      <div style="font-size:.9rem;color:var(--label);margin-bottom:4px">Canvas Grade</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.4rem;color:var(--acc)" id="fscaled">0</div>
+      <div style="font-size:.85rem;color:var(--label)">/ 100 pts</div>
+      <div style="font-size:.8rem;color:var(--label);margin-top:6px" id="fbest-note"></div>
+    </div>
+  </div>
+  <h2 id="rtitle">Great Work!</h2>
+  <p class="rmsg" id="rmsg"></p>
+  <div class="sgrid" id="sgrid"></div>
+  <div class="ssbox">
+    <h4>&#128190; Your Scorecard</h4>
+    <p>A scorecard PNG showing your name, business, and round scores will <strong>download automatically</strong> when you submit to Canvas. You can also download it again any time using the button below. Upload it to Canvas alongside your submission if required.<br><br>
+    If you play all four businesses, each scorecard will show which business you used.</p>
+  </div>
+  <div class="rbtns">
+    <button class="btnout" onclick="restart()">Try Another Business &#8635;</button>
+    <button class="btnout" id="png-btn" onclick="downloadPNG()">&#128190; Download Scorecard</button>
+    <button class="btn" onclick="finish()">Submit to Canvas &#10003;</button>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+// ── SCORM ──
+var SC={A:null,ok:false,
+  find:function(){var w=window;for(var i=0;i<10;i++){if(w.API){this.A=w.API;return true;}if(!w.parent||w.parent===w)break;w=w.parent;}return false;},
+  init:function(){if(!this.find())return;this.ok=this.A.LMSInitialize('')==='true';if(this.ok){this.A.LMSSetValue('cmi.core.lesson_status','incomplete');this.A.LMSCommit('');}},
+  // Convert raw /500 to /100 scale for Canvas gradebook
+  toScale:function(r){return Math.round((r/500)*100);},
+  // Read previously recorded score from SCORM (returns 0 if none)
+  getPrev:function(){
+    if(!this.ok)return parseInt(localStorage.getItem('cvp-best-raw')||'0',10)||0;
+    var v=parseFloat(this.A.LMSGetValue('cmi.core.score.raw'));
+    return isNaN(v)?0:Math.round(v/100*500); // convert stored /100 back to /500
+  },
+  score:function(raw){
+    if(!this.ok)return;
+    var scaled=this.toScale(raw);
+    this.A.LMSSetValue('cmi.core.score.raw',scaled);
+    this.A.LMSSetValue('cmi.core.score.min',0);
+    this.A.LMSSetValue('cmi.core.score.max',100);
+    this.A.LMSCommit('');
+  },
+  done:function(raw){
+    // Only submit if this score is the highest achieved
+    var prev=this.getPrev();
+    var best=Math.max(raw,prev);
+    // Persist best in localStorage as fallback
+    try{localStorage.setItem('cvp-best-raw',best);}catch(e){}
+    var scaled=this.toScale(best);
+    if(!this.ok){
+      alert('Score submitted: '+scaled+'/100 (converted from '+best+'/500)\n'+(best>prev?'New best score recorded!':'Previous best score kept: '+this.toScale(prev)+'/100'));
+      return;
+    }
+    this.score(best);
+    this.A.LMSSetValue('cmi.core.lesson_status',best>=300?'passed':'failed');
+    this.A.LMSCommit('');
+    // LMSFinish intentionally omitted — keeps student on results screen
+    // so they can download their scorecard and try another business
+  }
+};
+SC.init();
+
+// ── BUSINESS METADATA (names/types only — numbers generated fresh each session) ──
+var BIZ_META={
+  taco:  {name:"Rosita's Taco Truck",   type:"Street Food \u00b7 High-Volume"},
+  tshirt:{name:"Pixel & Press Tees",    type:"Custom Apparel \u00b7 Online + Local"},
+  coffee:{name:"Grounds & Glory Kiosk", type:"Specialty Coffee \u00b7 Campus"},
+  candle:{name:"Ember & Wax Co.",       type:"Handmade Goods \u00b7 Boutique"}
+};
+
+// ── CONSTRAINED RANDOMIZATION ENGINE ──
+var BIZ_CFG={
+  taco:  {priceRange:[7,12],  vcPct:[0.30,0.48],fcRange:[1800,3200],step:0.50},
+  tshirt:{priceRange:[20,32], vcPct:[0.30,0.44],fcRange:[2500,4500],step:1.00},
+  coffee:{priceRange:[4,6.5], vcPct:[0.25,0.42],fcRange:[1500,2800],step:0.25},
+  candle:{priceRange:[14,22], vcPct:[0.28,0.44],fcRange:[1200,2600],step:0.50}
+};
+
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rChoice(arr){return arr[rInt(0,arr.length-1)];}
+function rTo(v,step){return Math.round(v/step)*step;}
+
+function genBase(bid){
+  var cfg=BIZ_CFG[bid],tries=0,price,vc,fc,cm,cmr,be,bes;
+  do{
+    var pSteps=Math.round((cfg.priceRange[1]-cfg.priceRange[0])/cfg.step);
+    price=rTo(cfg.priceRange[0]+rInt(0,pSteps)*cfg.step,0.01);
+    vc=rTo(price*(cfg.vcPct[0]+Math.random()*(cfg.vcPct[1]-cfg.vcPct[0])),cfg.step);
+    fc=rInt(Math.ceil(cfg.fcRange[0]/100),Math.floor(cfg.fcRange[1]/100))*100;
+    cm=rTo(price-vc,0.01); cmr=cm/price;
+    be=Math.ceil(fc/cm); bes=Math.round(fc/cmr);
+    tries++;
+  }while((be<90||be>650||cm<1.5||cmr<0.25)&&tries<300);
+  return tries<300?{price,vc,fc,cm,cmr,be,bes}:null;
+}
+
+function genBiz(bid,slot){
+  var cfg=BIZ_CFG[bid],MAX=200,tries;
+  var b=null;
+  for(var attempt=0;attempt<20;attempt++){b=genBase(bid);if(b)break;}
+  if(!b)return null;
+
+  // R0: current units — above or below BEP per slot flag
+  var currentUnits=slot.r2Above
+    ?Math.ceil(b.be*(1.10+Math.random()*0.25))
+    :Math.ceil(b.be*(0.60+Math.random()*0.28));
+
+  // R1: promo — enforce YES or NO answer
+  var cut,newUnits,newCM,promoTC,currentTC;
+  tries=0;
+  do{
+    var cutOpts=[0.25,0.50,0.75,1.00,1.25,1.50].filter(function(c){return c<b.cm*0.45;});
+    cut=rChoice(cutOpts);
+    newUnits=Math.round(currentUnits*(1.10+Math.random()*0.25));
+    newCM=rTo(b.cm-cut,0.01);
+    promoTC=newUnits*newCM;
+    currentTC=currentUnits*b.cm;
+    var isYes=promoTC>currentTC;
+    if(slot.r1Answer==='yes'&&isYes)break;
+    if(slot.r1Answer==='no'&&!isYes)break;
+    // force NO: bump cut until promo is worse
+    if(slot.r1Answer==='no'){
+      cut=rTo(b.cm*(1-currentUnits/newUnits)+0.26,0.25);
+      cut=Math.min(cut,rTo(b.cm*0.44,0.25));
+      newCM=rTo(b.cm-cut,0.01);
+      promoTC=newUnits*newCM;
+      if(promoTC<currentTC)break;
+    }
+    tries++;
+  }while(tries<MAX);
+
+  // R2: rent increase
+  var rentIncrease=rChoice([150,200,250,300,350,400,500]);
+  var newFC=b.fc+rentIncrease, newBE=Math.ceil(newFC/b.cm);
+
+  // R3: target profit (ensures tpUnits = 115-180% of BEP)
+  var tp,tpUnits,tpSales;
+  tries=0;
+  do{
+    tp=rInt(Math.ceil(b.fc*0.20/50),Math.floor(b.fc*0.50/50))*50;
+    tpUnits=Math.ceil((b.fc+tp)/b.cm);
+    tpSales=Math.round((b.fc+tp)/b.cmr);
+    tries++;
+  }while((tpUnits<b.be*1.15||tpUnits>b.be*1.8||tp<300)&&tries<MAX);
+  if(tries>=MAX)return null;
+
+  // R4: MOS + hire — enforce hire answer
+  var r3_pct,aU,mosU,mosD,r3_hire,hireBreak,hireGood;
+  tries=0;
+  do{
+    r3_pct=0.10+Math.random()*0.30;
+    aU=Math.ceil(b.be*(1+r3_pct));
+    mosU=aU-b.be; mosD=Math.round(mosU*b.price);
+    var hMin=slot.r4Hire?50:mosU*b.cm+50;
+    var hMax=slot.r4Hire?mosU*b.cm-50:b.fc*0.4;
+    if(hMax<hMin){tries++;continue;}
+    r3_hire=rInt(Math.ceil(hMin/50),Math.floor(hMax/50))*50;
+    hireBreak=Math.ceil(r3_hire/b.cm);
+    hireGood=mosU>hireBreak;
+    tries++;
+  }while(hireGood!==slot.r4Hire&&tries<MAX);
+  if(tries>=MAX)return null;
+
+  // R5: DOL — both options positive NOI, enforce safer side
+  var qty,aFC,aVC,bFC,bVC,cmA,cmB,tcmA,tcmB,noiA,noiB,dolA,dolB;
+  tries=0;
+  do{
+    qty=Math.round(b.be*(1.30+Math.random()*0.50));
+    if(slot.r5SaferA){
+      aFC=rTo(b.fc*(0.8+Math.random()*0.5),100);
+      aVC=rTo(b.vc*(0.15+Math.random()*0.20),cfg.step);
+      bFC=rTo(b.fc*(0.3+Math.random()*0.25),100);
+      bVC=rTo(b.vc*(1.20+Math.random()*0.40),cfg.step);
+    }else{
+      aFC=rTo(b.fc*(1.4+Math.random()*0.8),100);
+      aVC=rTo(b.vc*(0.15+Math.random()*0.20),cfg.step);
+      bFC=rTo(b.fc*(0.4+Math.random()*0.25),100);
+      bVC=rTo(b.vc*(0.90+Math.random()*0.35),cfg.step);
+    }
+    cmA=rTo(b.price-aVC,0.01); cmB=rTo(b.price-bVC,0.01);
+    tcmA=cmA*qty; tcmB=cmB*qty;
+    noiA=tcmA-aFC; noiB=tcmB-bFC;
+    dolA=noiA>0?tcmA/noiA:null; dolB=noiB>0?tcmB/noiB:null;
+    tries++;
+  }while((noiA<=100||noiB<=100||!dolA||!dolB||cmA<0.75||cmB<0.50||
+    (slot.r5SaferA&&dolA>=dolB)||((!slot.r5SaferA)&&dolB>=dolA))&&tries<MAX);
+  if(tries>=MAX)return null;
+
+  return Object.assign({},BIZ_META[bid],b,{
+    r0_units:currentUnits,r0_cut:cut,r0_newUnits:newUnits,
+    r0_newCM:newCM,r0_promoTC:promoTC,r0_currentTC:currentTC,
+    r0_answer:slot.r1Answer,
+    r2_rent:rentIncrease,r2_newFC:newFC,r2_newBE:newBE,
+    r2_aboveBEP:slot.r2Above,r2_currentNOI:currentUnits*b.cm-b.fc,
+    tp:tp,tpUnits:tpUnits,tpSales:tpSales,
+    r3_pct:r3_pct,r3_hire:r3_hire,aU:aU,mosU:mosU,mosD:mosD,
+    hireBreak:hireBreak,hireGood:hireGood,
+    r4:{aFC:aFC,aVC:aVC,bFC:bFC,bVC:bVC,price:b.price,qty:qty,
+        cmA:cmA,cmB:cmB,tcmA:tcmA,tcmB:tcmB,noiA:noiA,noiB:noiB,
+        dolA:parseFloat(dolA.toFixed(2)),dolB:parseFloat(dolB.toFixed(2)),
+        safer:slot.r5SaferA?'A':'B'}
+  });
+}
+
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=rInt(0,i);var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+function generateAllBiz(){
+  // Enforce 2/2 splits across all 4 companies for R1, R2, R4, R5
+  var bids=['taco','tshirt','coffee','candle'];
+  var r1 =shuffle(['yes','yes','no','no']);
+  var r2 =shuffle([true,true,false,false]);
+  var r4 =shuffle([true,true,false,false]);
+  var r5 =shuffle([true,true,false,false]);
+  var result={};
+  for(var i=0;i<bids.length;i++){
+    var slot={r1Answer:r1[i],r2Above:r2[i],r4Hire:r4[i],r5SaferA:r5[i]};
+    var biz=null;
+    for(var attempt=0;attempt<15;attempt++){biz=genBiz(bids[i],slot);if(biz)break;}
+    if(!biz)return null; // full retry
+    result[bids[i]]=biz;
+  }
+  return result;
+}
+
+// ── SESSION-LEVEL BIZ DATA (generated once per page load) ──
+var SESSION_BIZ=null;
+(function initSession(){
+  for(var attempt=0;attempt<30;attempt++){
+    SESSION_BIZ=generateAllBiz();
+    if(SESSION_BIZ)break;
+  }
+  if(!SESSION_BIZ)console.error('CVP: randomization failed after 30 attempts');
+})();
+
+var G={name:'',bid:null,biz:null,round:0,score:0,profit:0,res:[],history:[],reviewing:false,_r4:null};
+
+// ── INTRO / NAV ──
+function chk(){var n=document.getElementById('sname').value.trim();document.getElementById('gobtn').disabled=!(n.length>=2&&G.bid);}
+function pick(el){
+  document.querySelectorAll('.scc').forEach(function(c){
+    c.classList.remove('sel');
+    c.setAttribute('aria-checked','false');
+    c.setAttribute('tabindex','-1');
+  });
+  el.classList.add('sel');
+  el.setAttribute('aria-checked','true');
+  el.setAttribute('tabindex','0');
+  G.bid=el.dataset.id;chk();
+}
+function focusNextBiz(el,dir){
+  var cards=Array.from(document.querySelectorAll('.scc'));
+  var idx=cards.indexOf(el);
+  var next=cards[(idx+dir+cards.length)%cards.length];
+  next.focus();
+}
+function goFml(){G.name=document.getElementById('sname').value.trim();showScreen('formulas');}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  document.getElementById('ffb').style.display=id==='game'?'flex':'none';
+  // floating dys button visible on non-game screens; header button handles game screen
+  var floatBtn=document.getElementById('dys-float-btn');
+  if(floatBtn) floatBtn.style.display=id==='game'?'none':'block';
+}
+
+// ── DYSLEXIA TOGGLE ──
+function toggleDys(){
+  var on=document.documentElement.classList.toggle('dyslexic');
+  // sync both buttons
+  ['dys-btn','dys-float-btn'].forEach(function(id){
+    var btn=document.getElementById(id);
+    if(!btn)return;
+    btn.setAttribute('aria-pressed',on?'true':'false');
+    btn.classList.toggle('on',on);
+    btn.textContent=on?'\uD83D\uDD13 Standard Font':'\uD83D\uDD13 Dyslexia Font';
+  });
+  // persist preference in sessionStorage
+  try{sessionStorage.setItem('cvp-dyslexic',on?'1':'0');}catch(e){}
+}
+// Restore preference on load
+(function(){
+  try{
+    if(sessionStorage.getItem('cvp-dyslexic')==='1'){
+      document.documentElement.classList.add('dyslexic');
+      // buttons updated after DOM ready
+      document.addEventListener('DOMContentLoaded',function(){
+        ['dys-btn','dys-float-btn'].forEach(function(id){
+          var btn=document.getElementById(id);
+          if(!btn)return;
+          btn.setAttribute('aria-pressed','true');
+          btn.classList.add('on');
+          btn.textContent='\uD83D\uDD13 Standard Font';
+        });
+      });
+    }
+  }catch(e){}
+})();
+
+// ── MODAL focus trap + Escape ──
+var _modPrev=null;
+function openMod(){
+  var mod=document.getElementById('fmod');
+  mod.classList.add('open');
+  _modPrev=document.activeElement;
+  // move focus to close button
+  var closeBtn=mod.querySelector('.mx');
+  if(closeBtn) setTimeout(function(){closeBtn.focus();},50);
+  // trap Tab inside modal
+  mod.addEventListener('keydown',_trapTab);
+  document.addEventListener('keydown',_escMod);
+}
+function closeMod(){
+  var mod=document.getElementById('fmod');
+  mod.classList.remove('open');
+  mod.removeEventListener('keydown',_trapTab);
+  document.removeEventListener('keydown',_escMod);
+  if(_modPrev) _modPrev.focus();
+}
+function _escMod(e){if(e.key==='Escape')closeMod();}
+function _trapTab(e){
+  if(e.key!=='Tab')return;
+  var mod=document.getElementById('fmod');
+  var focusable=Array.from(mod.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'));
+  if(!focusable.length)return;
+  var first=focusable[0],last=focusable[focusable.length-1];
+  if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}
+  else{if(document.activeElement===last){e.preventDefault();first.focus();}}
+}
+
+function startGame(){
+  if(!SESSION_BIZ||!SESSION_BIZ[G.bid]){alert('Setup error — please refresh and try again.');return;}
+  G.biz=SESSION_BIZ[G.bid];
+  G.round=0;G.score=0;G.profit=0;G.res=[];G.history=[];G.reviewing=false;G._r4=null;
+  document.getElementById('sbn').textContent=G.biz.name;
+  document.getElementById('sbt').textContent=G.biz.type;
+  document.getElementById('sbstu').textContent=G.name;
+  updSide();buildDots();
+  showScreen('game');loadRound(0);
+}
+
+// ── DOTS ──
+var RC_SHORT=['CM','BEP','Target','Safety','Leverage'];
+function buildDots(){
+  var d=document.getElementById('rdots');d.innerHTML='';
+  for(var i=0;i<5;i++){
+    var btn=document.createElement('button');
+    btn.type='button';btn.id='d'+i;btn.className='dot';
+    btn.dataset.idx=i;
+    btn.addEventListener('click',function(){dotClick(parseInt(this.dataset.idx));});
+    d.appendChild(btn);
+  }
+  updDots();
+}
+function dotClick(idx){if(idx>=G.round)return;reviewRound(idx);}
+function updDots(){
+  var labels=['Round 1: CM','Round 2: BEP','Round 3: Target Profit','Round 4: Margin of Safety','Round 5: Operating Leverage'];
+  for(var i=0;i<5;i++){
+    var d=document.getElementById('d'+i);if(!d)continue;
+    if(i<G.round){d.className='dot dn';d.title='Review Round '+(i+1)+' \u2014 '+RC_SHORT[i];d.setAttribute('aria-label',labels[i]+' (completed \u2014 click to review)');}
+    else if(i===G.round){d.className='dot cu';d.setAttribute('aria-label',labels[i]+' (current round)');d.title='';}
+    else{d.className='dot';d.setAttribute('aria-label',labels[i]+' (not yet reached)');d.title='';}
+  }
+  document.getElementById('dot-hint').textContent=G.round>0?'Tap a teal \u25cf to review a past round.':'';
+}
+
+// ── REVIEW ──
+function reviewRound(idx){
+  G.reviewing=true;
+  var s=G.history[idx];if(!s)return;
+  document.getElementById('hr').textContent=idx+1;
+  var b=G.biz,cm=b.price-b.vc,cmr=cm/b.price,be=Math.ceil(b.fc/cm),bes=Math.round(b.fc/cmr);
+  var h='';
+  h+='<div class="review-banner anim"><span class="ri">&#128065;&#65039;</span> Reviewing Round '+(idx+1)+': '+s.concept+' &nbsp;<span style="font-size:.9rem;opacity:.65">(read-only)</span></div>';
+  h+='<div class="rhd anim" style="animation-delay:.04s"><div><div class="rtag">Round '+(idx+1)+' of 5</div>';
+  h+='<div class="rtitle">'+s.title+'</div><div class="rdesc">'+s.desc+'</div></div>';
+  h+='<span class="pill">'+s.concept+'</span></div>';
+  h+='<div class="fbox anim" style="animation-delay:.07s"><h5>Formulas for This Round</h5>';
+  s.formulas.forEach(function(f){h+='<div class="fl"><code>'+f+'</code></div>';});
+  h+='</div>';
+  h+='<div class="nums anim" style="animation-delay:.1s">';
+  h+=ncell('Selling Price','$'+b.price.toFixed(2));h+=ncell('Variable Cost','$'+b.vc.toFixed(2));
+  h+=ncell('Fixed Costs/mo','$'+b.fc.toLocaleString());h+=ncell('CM / Unit','$'+cm.toFixed(2),'w');
+  h+=ncell('CM Ratio',(cmr*100).toFixed(1)+'%','w');h+=ncell('BEP (units)',be+' units');h+=ncell('BEP ($)','$'+bes.toLocaleString());
+  h+='</div>';
+  h+='<div class="dc anim" style="animation-delay:.13s">';
+  h+='<h4>'+s.decisionTitle+'</h4>';
+  h+='<p class="scenario-p">'+s.scenario+'</p>';
+  h+='<p class="dir-line">Your submitted answers:</p>';
+  s.answers.forEach(function(a){
+    h+='<div class="irow"><div class="ro-wrap"><label>'+a.label+'</label><div class="ro-val">'+a.value+'</div></div></div>';
+  });
+  h+=s.feedback;
+  h+='<div style="margin-top:16px;padding:14px 16px;background:rgba(255,255,255,.04);border-radius:10px;font-size:1.05rem;color:var(--label)">Points earned this round: <strong style="color:var(--acc);font-size:1.15rem">'+s.pts+' / 100</strong></div>';
+  h+='</div>';
+  h+='<div style="padding-bottom:40px"><button class="btn" onclick="returnToCurrent()">&#8594; Back to Round '+(G.round+1)+'</button></div>';
+  document.getElementById('ma').innerHTML=h;
+  document.getElementById('ma').scrollTo({top:0,behavior:'smooth'});
+}
+function returnToCurrent(){G.reviewing=false;document.getElementById('hr').textContent=G.round+1;loadRound(G.round);}
+
+// ── ROUND METADATA ──
+var RT=['Understanding Your Contribution Margin','Find Your Break-Even Point','Setting a Profit Target','How Safe Is Your Business?','Leverage: Risk vs. Reward'];
+var RC=['Contribution Margin & CM Ratio','Break-Even Point','Target Profit','Margin of Safety','Operating Leverage'];
+var RD=[
+  'Before planning for profit, you need to know how much each sale contributes toward covering your fixed costs \u2014 and eventually generating profit. This is called the Contribution Margin.',
+  'Break-even is where total revenue exactly equals total costs \u2014 zero profit, zero loss. Every unit sold beyond break-even starts generating real profit.',
+  'Rather than just hoping for profit, smart owners set a specific target and work backward to figure out exactly how many units they need to sell.',
+  'The Margin of Safety tells you how far your sales can drop before you hit break-even. A bigger margin means your business can absorb more downturns.',
+  'Operating leverage shows how sensitive your profit is to sales changes. Businesses with high fixed costs swing harder \u2014 big gains when sales rise, big losses when they fall.'
+];
+var RF=[
+  ['CM per Unit = P \u2212 VC','CM Ratio = CM per Unit \u00f7 P','Total CM = Units Sold \u00d7 CM per Unit'],
+  ['BEP (units) = FC \u00f7 CM per Unit','BEP ($) = FC \u00f7 CM Ratio','NOI = (Units \u00d7 CM per Unit) \u2212 FC'],
+  ['Required Units = (FC + Target Profit) \u00f7 CM per Unit','Required Sales $ = (FC + Target Profit) \u00f7 CM Ratio'],
+  ['MOS (units) = Actual Units \u2212 BEP Units','MOS ($) = MOS Units \u00d7 Selling Price','MOS % = MOS Units \u00f7 Actual Units \u00d7 100'],
+  ['DOL = Total CM \u00f7 Net Operating Income','% Change in NOI = % Change in Sales \u00d7 DOL']
+];
+
+// ── BEP CHART BUILDER ──
+// Draws the chart and wires up the slider for rounds 2, 3, 4.
+// containerId = the id of the <canvas>, sliderId = the range input id.
+// markerUnits (optional) = show a special dot for a specific point (e.g. actual units in MOS round).
+function buildBepChart(b, containerId, sliderId, markerUnits){
+  var cm=b.price-b.vc, be=Math.ceil(b.fc/cm);
+  var maxU=Math.ceil(be*2.2);
+  var canvas=document.getElementById(containerId);
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+
+  // DPR scaling for crisp render
+  var dpr=window.devicePixelRatio||1;
+  var rect=canvas.getBoundingClientRect();
+  var W=rect.width||canvas.offsetWidth||560;
+  var H=260;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.scale(dpr,dpr);
+
+  var PAD={t:20,r:20,b:48,l:60};
+  var CW=W-PAD.l-PAD.r, CH=H-PAD.t-PAD.b;
+
+  var maxRev=maxU*b.price;
+  var minCost=b.fc; // y at 0 units
+  var maxCost=b.fc+maxU*b.vc;
+  var maxY=Math.max(maxRev,maxCost)*1.05;
+
+  function xPx(u){return PAD.l+u/maxU*CW;}
+  function yPx(v){return PAD.t+CH-(v/maxY*CH);}
+
+  function drawChart(sliderU){
+    ctx.clearRect(0,0,W,H);
+
+    // Grid lines
+    ctx.strokeStyle='rgba(46,51,80,.7)';ctx.lineWidth=1;
+    var ySteps=5;
+    for(var i=0;i<=ySteps;i++){
+      var yv=maxY*i/ySteps;
+      var yp=yPx(yv);
+      ctx.beginPath();ctx.moveTo(PAD.l,yp);ctx.lineTo(PAD.l+CW,yp);ctx.stroke();
+      ctx.fillStyle='#b8bdd4';ctx.font='11px DM Sans,sans-serif';ctx.textAlign='right';
+      ctx.fillText('$'+Math.round(yv/1000)+'k',PAD.l-6,yp+4);
+    }
+    // X axis labels
+    ctx.fillStyle='#b8bdd4';ctx.font='11px DM Sans,sans-serif';ctx.textAlign='center';
+    var xSteps=5;
+    for(var j=0;j<=xSteps;j++){
+      var xu=maxU*j/xSteps;
+      ctx.fillText(Math.round(xu),xPx(xu),H-PAD.b+16);
+    }
+    // Axis label
+    ctx.fillStyle='#a0a5bc';ctx.font='12px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Units Sold',PAD.l+CW/2,H-4);
+
+    // ── Total Cost line (FC + VC*u) ──
+    ctx.beginPath();ctx.strokeStyle='#ff5c5c';ctx.lineWidth=2.5;ctx.setLineDash([]);
+    ctx.moveTo(xPx(0),yPx(b.fc));
+    ctx.lineTo(xPx(maxU),yPx(b.fc+maxU*b.vc));
+    ctx.stroke();
+
+    // ── Total Revenue line (price * u) ──
+    ctx.beginPath();ctx.strokeStyle='#3ecfb2';ctx.lineWidth=2.5;
+    ctx.moveTo(xPx(0),yPx(0));
+    ctx.lineTo(xPx(maxU),yPx(maxU*b.price));
+    ctx.stroke();
+
+    // ── Shaded LOSS region (left of BEP) ──
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(xPx(0),yPx(0));
+    // revenue 0→BEP
+    ctx.lineTo(xPx(be),yPx(be*b.price));
+    // cost BEP→0 backwards
+    ctx.lineTo(xPx(be),yPx(b.fc+be*b.vc));
+    ctx.lineTo(xPx(0),yPx(b.fc));
+    ctx.closePath();
+    ctx.fillStyle='rgba(255,92,92,.12)';ctx.fill();
+    ctx.restore();
+
+    // ── Shaded PROFIT region (right of BEP) ──
+    if(maxU>be){
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(xPx(be),yPx(be*b.price));
+      ctx.lineTo(xPx(maxU),yPx(maxU*b.price));
+      ctx.lineTo(xPx(maxU),yPx(b.fc+maxU*b.vc));
+      ctx.lineTo(xPx(be),yPx(b.fc+be*b.vc));
+      ctx.closePath();
+      ctx.fillStyle='rgba(74,222,128,.10)';ctx.fill();
+      ctx.restore();
+    }
+
+    // ── BEP vertical dashed line ──
+    ctx.setLineDash([5,4]);ctx.strokeStyle='#f5c542';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(xPx(be),PAD.t);ctx.lineTo(xPx(be),PAD.t+CH);ctx.stroke();
+    ctx.setLineDash([]);
+    // BEP label
+    ctx.fillStyle='#f5c542';ctx.font='bold 11px Syne,sans-serif';ctx.textAlign='center';
+    ctx.fillText('BEP = '+be+' units',xPx(be),PAD.t-6);
+
+    // ── LOSS / PROFIT labels inside shaded areas ──
+    if(be>4){
+      ctx.fillStyle='rgba(255,92,92,.7)';ctx.font='bold 11px DM Sans,sans-serif';ctx.textAlign='center';
+      ctx.fillText('LOSS',xPx(be*0.45),yPx(maxY*0.3));
+    }
+    if(maxU-be>4){
+      ctx.fillStyle='rgba(74,222,128,.7)';ctx.font='bold 11px DM Sans,sans-serif';ctx.textAlign='center';
+      ctx.fillText('PROFIT',xPx(be+(maxU-be)*0.55),yPx(maxY*0.75));
+    }
+
+    // ── Optional marker (e.g. actual units in MOS round) ──
+    if(markerUnits!=null){
+      var mx=xPx(markerUnits), myRev=yPx(markerUnits*b.price);
+      ctx.beginPath();ctx.arc(mx,myRev,6,0,Math.PI*2);
+      ctx.fillStyle='#f5c542';ctx.fill();
+      ctx.fillStyle='#f5c542';ctx.font='bold 11px Syne,sans-serif';ctx.textAlign='left';
+      ctx.fillText('Actual: '+markerUnits+' units',mx+10,myRev-4);
+    }
+
+    // ── Slider dot on revenue line ──
+    if(sliderU!=null){
+      var su=Math.max(0,Math.min(sliderU,maxU));
+      var sRev=su*b.price, sCost=b.fc+su*b.vc;
+      var sxRev=xPx(su), syRev=yPx(sRev);
+      var syTC=yPx(sCost);
+
+      // Vertical line at slider
+      ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(sxRev,PAD.t);ctx.lineTo(sxRev,PAD.t+CH);ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Dot on TR
+      ctx.beginPath();ctx.arc(sxRev,syRev,7,0,Math.PI*2);
+      ctx.fillStyle='#3ecfb2';ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.fill();ctx.stroke();
+      // Dot on TC
+      ctx.beginPath();ctx.arc(sxRev,syTC,7,0,Math.PI*2);
+      ctx.fillStyle='#ff5c5c';ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.fill();ctx.stroke();
+    }
+  }
+
+  // Initial draw at mid-point
+  var initU=Math.round(maxU*0.35);
+  drawChart(initU);
+
+  // Wire slider
+  var slider=document.getElementById(sliderId);
+  if(slider){
+    slider.min=0;slider.max=maxU;slider.value=initU;
+
+    function updateSlider(){
+      var u=parseInt(slider.value);
+      var rev=u*b.price, tc=b.fc+u*b.vc, noi=rev-tc;
+      drawChart(u);
+      // update stat tiles
+      var profEl=document.getElementById(sliderId+'-noi');
+      var revEl =document.getElementById(sliderId+'-rev');
+      var tcEl  =document.getElementById(sliderId+'-tc');
+      var labelEl=document.getElementById(sliderId+'-label');
+      if(profEl){
+        profEl.textContent=(noi>=0?'+':'')+Math.round(noi).toLocaleString();
+        profEl.style.color=noi>0?'var(--ok)':noi<0?'var(--red)':'var(--acc)';
+      }
+      if(revEl) revEl.textContent='$'+Math.round(rev).toLocaleString();
+      if(tcEl)  tcEl.textContent='$'+Math.round(tc).toLocaleString();
+      if(labelEl){
+        if(noi>0) labelEl.textContent=u+' units \u2014 \u2705 PROFIT zone';
+        else if(noi<0) labelEl.textContent=u+' units \u2014 \u26a0\ufe0f LOSS zone';
+        else labelEl.textContent=u+' units \u2014 exactly break-even';
+        labelEl.style.color=noi>0?'var(--ok)':noi<0?'var(--red)':'var(--acc)';
+      }
+      // update aria-valuetext so screen readers announce profit/loss
+      slider.setAttribute('aria-valuetext', u+' units, '+(noi>=0?'$'+Math.round(noi).toLocaleString()+' profit':'$'+Math.round(-noi).toLocaleString()+' loss'));
+    }
+    slider.addEventListener('input',updateSlider);
+    updateSlider();
+  }
+}
+
+// Helper: build the chart HTML string (inserted before the decision card)
+function chartHtml(canvasId, sliderId, initVal){
+  return '<div class="chart-wrap anim" style="animation-delay:.12s">'+
+    '<div class="chart-title">&#128200; Break-Even Chart \u2014 Drag the slider to explore</div>'+
+    '<div class="chart-sub">The <span style="color:#3ecfb2;font-weight:700">teal line</span> is Total Revenue. '+
+    'The <span style="color:#ff5c5c;font-weight:700">red line</span> is Total Cost. '+
+    'Where they cross is your break-even point.</div>'+
+    '<div class="chart-canvas-wrap"><canvas id="'+canvasId+'" role="img" aria-label="Break-even chart showing Total Revenue in teal and Total Cost in red. They cross at the break-even point. Use the slider below to explore profit and loss zones."></canvas></div>'+
+    '<div class="slider-wrap">'+
+    '<div class="slider-label"><span style="color:var(--label);font-weight:600">&#128073; Set your unit target:</span>'+
+    '<span id="'+sliderId+'-label" class="sl-val even">0 units</span></div>'+
+    '<input type="range" class="bep-slider" id="'+sliderId+'" aria-label="Unit target" aria-valuetext="0 units">'+
+    '</div>'+
+    '<div class="slider-stat-row">'+
+    '<div class="slider-stat"><div class="ss-l">Total Revenue</div><div class="ss-v" id="'+sliderId+'-rev">$0</div></div>'+
+    '<div class="slider-stat"><div class="ss-l">Total Cost</div><div class="ss-v" id="'+sliderId+'-tc">$0</div></div>'+
+    '<div class="slider-stat"><div class="ss-l">Profit / Loss</div><div class="ss-v" id="'+sliderId+'-noi" style="color:var(--acc)">$0</div></div>'+
+    '</div>'+
+    '<div class="chart-legend">'+
+    '<span><span class="legend-dot" style="background:#3ecfb2"></span>Total Revenue</span>'+
+    '<span><span class="legend-dot" style="background:#ff5c5c"></span>Total Cost</span>'+
+    '<span><span class="legend-dot" style="background:#f5c54260;height:10px;width:10px;border-radius:2px"></span>Break-Even Point</span>'+
+    '</div>'+
+    '</div>';
+}
+
+// ── LOAD ROUND ──
+function loadRound(idx){
+  G.reviewing=false;updSide();updDots();
+  document.getElementById('hr').textContent=idx+1;
+  var b=G.biz,cm=b.price-b.vc,cmr=cm/b.price,be=Math.ceil(b.fc/cm),bes=Math.round(b.fc/cmr);
+  var h='';
+
+  // Round header
+  h+='<div class="rhd anim"><div><div class="rtag">Round '+(idx+1)+' of 5</div>';
+  h+='<div class="rtitle">'+RT[idx]+'</div><div class="rdesc">'+RD[idx]+'</div></div>';
+  h+='<span class="pill">'+RC[idx]+'</span></div>';
+
+  // Formula reminder
+  h+='<div class="fbox anim" style="animation-delay:.05s"><h5>Formulas for This Round</h5>';
+  RF[idx].forEach(function(f){h+='<div class="fl"><code>'+f+'</code></div>';});
+  h+='</div>';
+
+  // Live numbers
+  h+='<div class="nums anim" style="animation-delay:.1s">';
+  h+=ncell('Selling Price','$'+b.price.toFixed(2));h+=ncell('Variable Cost','$'+b.vc.toFixed(2));
+  h+=ncell('Fixed Costs/mo','$'+b.fc.toLocaleString());h+=ncell('CM / Unit','$'+cm.toFixed(2),'w');
+  h+=ncell('CM Ratio',(cmr*100).toFixed(1)+'%','w');h+=ncell('BEP (units)',be+' units');h+=ncell('BEP ($)','$'+bes.toLocaleString());
+  h+='</div>';
+
+  // ── CHART for rounds 2 and 4 only (not round 3 — students must calculate target profit without the graph) ──
+  if(idx===1||idx===3){
+    var markerU=(idx===3)?b.aU:null;
+    h+=chartHtml('bep-canvas-'+idx,'bep-sl-'+idx,Math.round(be*0.6),markerU);
+  }
+
+  // Decision card
+  h+='<div class="dc anim" style="animation-delay:.18s" id="dc">';
+
+  if(idx===0){
+    // ── ROUND 1: Contribution Margin ──
+    var cut=b.r0_cut, newU=b.r0_newUnits;
+    h+='<h4>&#128161; The Decision: Promotional Pricing</h4>';
+    h+='<p class="scenario-p">A nearby competitor just cut their prices. Your marketing team is suggesting you drop your price by <strong>$'+cut.toFixed(2)+'</strong>. Right now you sell about <strong>'+b.r0_units+' units per month</strong>. The team estimates the lower price could boost volume to roughly <strong>'+newU+' units</strong>.</p>';
+    h+='<p class="dir-line">Calculate each value below, then decide whether the promo is worth running.</p>';
+    h+='<div class="irow">';
+    h+='<div class="ig"><label for="i0a">Step 1 &mdash; What is your current CM per unit? ($)</label><input type="number" id="i0a" step="0.01" min="0"></div>';
+    h+='<div class="ig"><label for="i0b">Step 2 &mdash; What would the new CM per unit be after the $'+cut.toFixed(2)+' price cut? ($)</label><input type="number" id="i0b" step="0.01" min="0"></div></div>';
+    h+='<div class="irow"><div class="ig"><label for="i0c">Step 3 &mdash; Based on your calculations, what is your decision?</label>';
+    h+='<select id="i0c"><option value="">-- Select your decision --</option><option value="yes">Run the promo (cut price $'+cut.toFixed(2)+')</option><option value="no">Keep current price</option></select></div></div>';
+
+  }else if(idx===1){
+    // ── ROUND 2: Break-Even — Bloom's Level 6 Synthesis questions ──
+    // Q1: Rent increase scenario — values come from randomized biz data
+    var rentIncrease=b.r2_rent;
+    var newFC=b.r2_newFC;
+    var newBE=b.r2_newBE;
+
+    // 4 options: correct newBE + 3 plausible wrong answers
+    var q1_wrong1=Math.ceil((b.fc+rentIncrease*0.5)/cm);   // only half the rent increase
+    var q1_wrong2=be;                                        // forgot to include rent increase (old BEP)
+    var q1_wrong3=Math.ceil((b.fc+rentIncrease*2)/cm);      // doubled the rent increase
+    var q1Opts=[newBE,q1_wrong1,q1_wrong2,q1_wrong3];
+    q1Opts.sort(function(a,b2){return a-b2;});
+
+    // Q2: Partner proposes a target — student must choose the best strategic justification
+    // Four targets at different distances from BEP, each paired with a reasoning statement
+    var t_safe   = be + Math.round(be*0.30);  // 30% above BEP — best answer
+    var t_bare   = be + Math.round(be*0.05);  // just barely above BEP
+    var t_at     = be;                         // exactly at BEP
+    var t_below  = Math.max(1, be - Math.round(be*0.20)); // below BEP
+
+    var q2Choices=[
+      {units:t_below,  val:'below',  label:t_below+' units \u2014 \u201cThis keeps us conservative and avoids risk.\u201d'},
+      {units:t_at,     val:'at',     label:t_at+' units \u2014 \u201cThis is our break-even, so we\u2019ll be fine.\u201d'},
+      {units:t_bare,   val:'bare',   label:t_bare+' units \u2014 \u201cWe\u2019re above BEP so we\u2019ll earn a small profit.\u201d'},
+      {units:t_safe,   val:'safe',   label:t_safe+' units \u2014 \u201cThis gives us a meaningful profit buffer above break-even.\u201d'}
+    ];
+    // sort by units ascending
+    q2Choices.sort(function(a,b2){return a.units-b2.units;});
+
+    h+='<h4>&#9878; Break-Even Analysis: Construct Your Plan</h4>';
+    h+='<p class="scenario-p">Drag the slider on the chart above to explore how revenue and costs interact at different sales volumes. Then use what you observe — along with your formulas — to answer the two scenario questions below.</p>';
+    h+='<p class="dir-line">Both questions require you to apply your break-even knowledge to a new situation and justify your reasoning.</p>';
+
+    // Q1: Rent increase — construct new BEP
+    h+='<div style="margin-bottom:26px;background:rgba(245,197,66,.06);border:1px solid rgba(245,197,66,.2);border-radius:12px;padding:18px 20px">';
+    h+='<p style="font-size:1.05rem;font-weight:700;color:var(--acc);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">&#127968; Scenario: Rent Increase</p>';
+    h+='<p style="font-size:1.2rem;color:var(--tx);line-height:1.7;margin-bottom:14px">Your landlord just notified you that rent is going up by <strong>$'+rentIncrease.toLocaleString()+' per month</strong> starting next month. Your fixed costs will increase from <strong>$'+b.fc.toLocaleString()+'</strong> to <strong>$'+newFC.toLocaleString()+'</strong>. Using the break-even formula, predict what your <strong>new break-even point</strong> will be.</p>';
+    h+='<p style="font-size:1.1rem;font-weight:700;color:var(--tx);margin-bottom:12px">&#10067; Question 1 of 2 &mdash; What will your new break-even point be after the rent increase?</p>';
+    h+='<div class="mc-group" id="q1-group">';
+    q1Opts.forEach(function(u){
+      var hint='';
+      if(u===q1_wrong2) hint=' \u00a0<span style="font-size:.9rem;color:var(--label)">(hint: this is the current BEP)</span>';
+      h+='<label class="mc-opt" onclick="pickMC(\'q1-group\',this,\''+u+'\')"><input type="radio" name="q1" value="'+u+'"> '+u+' units'+hint+'</label>';
+    });
+    h+='</div></div>';
+
+    // Q2: Strategic recommendation — evaluate and justify
+    h+='<div style="margin-bottom:22px;background:rgba(62,207,178,.06);border:1px solid rgba(62,207,178,.2);border-radius:12px;padding:18px 20px">';
+    h+='<p style="font-size:1.05rem;font-weight:700;color:var(--a2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">&#128172; Scenario: Advising Your Business Partner</p>';
+    h+='<p style="font-size:1.2rem;color:var(--tx);line-height:1.7;margin-bottom:14px">Your business partner is proposing four different monthly sales targets. Each comes with their reasoning. Based on your understanding of break-even and what you see in the chart, <strong>which target and justification represents the strongest strategic plan</strong> for '+b.name+'?</p>';
+    h+='<p style="font-size:1.1rem;font-weight:700;color:var(--tx);margin-bottom:12px">&#10067; Question 2 of 2 &mdash; Which sales target and reasoning would you recommend?</p>';
+    h+='<div class="mc-group" id="q2-group">';
+    q2Choices.forEach(function(c){
+      h+='<label class="mc-opt" onclick="pickMC(\'q2-group\',this,\''+c.val+'\')"><input type="radio" name="q2" value="'+c.val+'"> '+c.label+'</label>';
+    });
+    h+='</div></div>';
+
+    // Store grading data
+    h+='<input type="hidden" id="r2-newBE" value="'+newBE+'">';
+    h+='<input type="hidden" id="r2-rentIncrease" value="'+rentIncrease+'">';
+    h+='<input type="hidden" id="r2-newFC" value="'+newFC+'">';
+    h+='<input type="hidden" id="r2-t-safe" value="'+t_safe+'">';
+
+  }else if(idx===2){
+    // ── ROUND 3: Target Profit ──
+    h+='<h4>&#127919; The Goal: Hit Your Profit Target</h4>';
+    h+='<p class="scenario-p"><strong>'+b.name+'</strong> is gaining momentum! You want to earn <strong>$'+b.tp.toLocaleString()+'</strong> in profit next month. Use the Target Profit formulas and the numbers in your sidebar to work backward from that goal and find exactly what it will take to get there.</p>';
+    h+='<p class="dir-line">Calculate the required units and sales dollars to hit your profit target.</p>';
+    h+='<div class="irow">';
+    h+='<div class="ig"><label for="i2a">Step 1 &mdash; How many units must you sell to earn $'+b.tp.toLocaleString()+' profit?</label><input type="number" id="i2a" step="1" min="0"></div>';
+    h+='<div class="ig"><label for="i2b">Step 2 &mdash; What total sales dollars does that represent? ($)</label><input type="number" id="i2b" step="1" min="0"></div></div>';
+    h+='<div class="irow"><div class="ig"><label for="i2c">Step 3 &mdash; Will you commit to this $'+b.tp.toLocaleString()+' target?</label>';
+    h+='<select id="i2c"><option value="">-- Select your plan --</option><option value="yes">Yes \u2014 pursue the $'+b.tp.toLocaleString()+' target</option><option value="stretch">Stretch for a higher goal</option><option value="no">Set a lower, more conservative target</option></select></div></div>';
+
+  }else if(idx===3){
+    // ── ROUND 4: Margin of Safety ──
+    var aU=b.aU;
+    h+='<h4>&#128737; The Analysis: Margin of Safety</h4>';
+    h+='<p class="scenario-p">Last month, <strong>'+b.name+'</strong> sold <strong>'+aU+' units</strong> \u2014 about '+Math.round(b.r3_pct*100)+'% above break-even. The yellow dot on the chart shows where you landed. Now you\'re considering hiring a part-timer for an extra <strong>$'+b.r3_hire.toLocaleString()+'/month</strong>. Calculate your margin of safety first.</p>';
+    h+='<p class="dir-line">Calculate both MOS measures, then decide whether the hire is wise.</p>';
+    h+='<div class="irow">';
+    h+='<div class="ig"><label for="i3a">Step 1 &mdash; Margin of Safety in units &nbsp;(Actual \u2212 BEP Units)</label><input type="number" id="i3a" step="1" min="0"></div>';
+    h+='<div class="ig"><label for="i3b">Step 2 &mdash; Margin of Safety in dollars ($)</label><input type="number" id="i3b" step="1" min="0"></div></div>';
+    h+='<div class="irow"><div class="ig"><label for="i3c">Step 3 &mdash; Should you hire the part-timer for $'+b.r3_hire.toLocaleString()+'/mo?</label>';
+    h+='<select id="i3c"><option value="">-- Select your decision --</option><option value="yes">Yes \u2014 hire the part-timer</option><option value="no">No \u2014 keep costs lean for now</option></select></div></div>';
+
+  }else{
+    // ── ROUND 5: Operating Leverage ──
+    var r4=b.r4;
+    G._r4={dolA:r4.dolA,dolB:r4.dolB,safer:r4.safer,noiA:r4.noiA,noiB:r4.noiB,tcmA:r4.tcmA,tcmB:r4.tcmB,cmA:r4.cmA,cmB:r4.cmB,r4:r4};
+    h+='<h4>&#128295; The Decision: Choose a Cost Structure</h4>';
+    h+='<p class="scenario-p"><strong>'+b.name+'</strong> is planning to expand next year. <strong>Option A</strong> invests in equipment (higher fixed costs, lower variable costs). <strong>Option B</strong> stays labor-based (lower fixed costs, higher variable costs). Both produce the same profit at <strong>'+r4.qty+' units</strong>.</p>';
+    h+='<p class="dir-line">Calculate the Operating Leverage for each option, then decide which is safer.</p>';
+    h+='<div class="opt-cards">';
+    h+='<div class="opt-card"><div class="opt-title" style="color:var(--a2)">Option A \u2014 Equipment</div><div class="opt-detail">Fixed Costs: $'+r4.aFC.toLocaleString()+'<br>Variable Cost/unit: $'+r4.aVC.toFixed(2)+'<br>Selling Price: $'+r4.price.toFixed(2)+'<br>Projected Volume: '+r4.qty+' units</div></div>';
+    h+='<div class="opt-card"><div class="opt-title" style="color:var(--acc)">Option B \u2014 Labor</div><div class="opt-detail">Fixed Costs: $'+r4.bFC.toLocaleString()+'<br>Variable Cost/unit: $'+r4.bVC.toFixed(2)+'<br>Selling Price: $'+r4.price.toFixed(2)+'<br>Projected Volume: '+r4.qty+' units</div></div>';
+    h+='</div>';
+    h+='<div class="irow"><div class="ig"><label for="i4a">Step 1 &mdash; Calculate DOL for Option A (at '+r4.qty+' units)</label><input type="number" id="i4a" step="0.01" min="0"></div>';
+    h+='<div class="ig"><label for="i4b">Step 2 &mdash; Calculate DOL for Option B (at '+r4.qty+' units)</label><input type="number" id="i4b" step="0.01" min="0"></div></div>';
+    h+='<div class="irow"><div class="ig"><label for="i4c">Step 3 &mdash; Which cost structure is safer for uncertain demand?</label>';
+    h+='<select id="i4c"><option value="">-- Select your answer --</option><option value="A">Option A \u2014 Equipment (lower variable costs)</option><option value="B">Option B \u2014 Labor (lower fixed costs)</option></select></div></div>';
+  }
+
+  h+='<div style="display:flex;gap:12px;margin-top:10px"><button class="btn" onclick="grade('+idx+')">Submit Decision &#8594;</button></div>';
+  h+='</div>'; // .dc
+  document.getElementById('ma').innerHTML=h;
+  document.getElementById('ma').scrollTop=0;
+
+  // Init chart AFTER DOM is populated (rounds 2 and 4 only)
+  if(idx===1||idx===3){
+    var markerU2=(idx===3)?b.aU:null;
+    setTimeout(function(){buildBepChart(b,'bep-canvas-'+idx,'bep-sl-'+idx,markerU2);},60);
+  }
+}
+
+// ── MC HELPER ──
+function pickMC(groupId, el, val){
+  var grp=document.getElementById(groupId);
+  if(!grp)return;
+  grp.querySelectorAll('.mc-opt').forEach(function(o){o.classList.remove('sel');});
+  el.classList.add('sel');
+}
+
+function ncell(l,v,c){return '<div class="nc"><div class="nl">'+l+'</div><div class="nv'+(c?' '+c:'')+'">'+v+'</div></div>';}
+
+// ── GRADING ──
+function grade(idx){
+  var b=G.biz,cm=b.price-b.vc,cmr=cm/b.price,be=Math.ceil(b.fc/cm),bes=Math.round(b.fc/cmr);
+  var pts=0,fbh='',profR=0,savedAnswers=[],savedScenario='',savedDecTitle='';
+
+  if(idx===0){
+    var iCM=parseFloat(document.getElementById('i0a').value)||0;
+    var iNCM=parseFloat(document.getElementById('i0b').value)||0;
+    var dec=document.getElementById('i0c').value;
+    var nCM=b.r0_newCM, newU=b.r0_newUnits;
+    var curTC=b.r0_currentTC, promoTC=b.r0_promoTC, good=b.r0_answer;
+    var cmOK=Math.abs(iCM-cm)<0.11,nOK=Math.abs(iNCM-nCM)<0.11;
+    pts=(cmOK?30:0)+(nOK?30:0)+(dec===good?40:0);
+    profR=dec==='yes'?(newU*nCM-b.fc):(b.r0_units*cm-b.fc);
+    savedDecTitle='The Decision: Promotional Pricing';
+    savedScenario='Competitor cut prices. Consider dropping price by <strong>$'+b.r0_cut.toFixed(2)+'</strong>. Current volume: <strong>'+b.r0_units+' units/mo</strong>. Estimated promo volume: <strong>'+newU+' units</strong>.';
+    savedAnswers=[{label:'Step 1: Current CM per unit',value:'$'+iCM.toFixed(2)},{label:'Step 2: New CM after $'+b.r0_cut.toFixed(2)+' cut',value:'$'+iNCM.toFixed(2)},{label:'Step 3: Decision',value:dec==='yes'?'Run the promo':'Keep current price'}];
+    fbh=mkFb(cmOK&&nOK&&dec===good,'Contribution Margin',
+      'CM per unit = <strong>$'+cm.toFixed(2)+'</strong> ($'+b.price.toFixed(2)+' \u2212 $'+b.vc.toFixed(2)+')<br>After $'+b.r0_cut.toFixed(2)+' cut, new CM = <strong>$'+nCM.toFixed(2)+'</strong><br><br>'+
+      'Current total CM ('+b.r0_units+' units): <strong>$'+Math.round(curTC).toLocaleString()+'</strong><br>Promo total CM ('+newU+' units): <strong>$'+Math.round(promoTC).toLocaleString()+'</strong><br><br>'+
+      'Best decision: <strong>'+(good==='yes'?'Run the promo':'Keep current price')+'</strong> \u2014 it produces the higher total contribution margin.',
+      b.r0_units+' \u00d7 $'+cm.toFixed(2)+' = $'+Math.round(curTC).toLocaleString()+'  vs  '+newU+' \u00d7 $'+nCM.toFixed(2)+' = $'+Math.round(promoTC).toLocaleString());
+
+  }else if(idx===1){
+    var q1=document.querySelector('#q1-group input[type=radio]:checked');
+    var q2=document.querySelector('#q2-group input[type=radio]:checked');
+    var q1val=q1?parseInt(q1.value):0;
+    var q2val=q2?q2.value:'';
+    var correctNewBE=parseInt(document.getElementById('r2-newBE').value)||0;
+    var rentInc=parseInt(document.getElementById('r2-rentIncrease').value)||0;
+    var newFCval=parseInt(document.getElementById('r2-newFC').value)||0;
+    var tSafe=parseInt(document.getElementById('r2-t-safe').value)||0;
+    var q1OK=(q1val===correctNewBE);
+    var q2OK=(q2val==='safe');
+    pts=(q1OK?50:0)+(q2OK?50:0);
+    profR=tSafe*cm-b.fc;
+    savedDecTitle='Break-Even Analysis: Construct Your Plan';
+    savedScenario='Rent increased by <strong>$'+rentInc.toLocaleString()+'/mo</strong>. New FC = <strong>$'+newFCval.toLocaleString()+'</strong>. New BEP = <strong>'+correctNewBE+' units</strong>.';
+    savedAnswers=[
+      {label:'Q1: New BEP after $'+rentInc.toLocaleString()+' rent increase',value:q1val?q1val+' units':'(no answer)'},
+      {label:'Q2: Strongest strategic sales target',value:q2val==='safe'?tSafe+' units \u2014 meaningful profit buffer above BEP':q2val==='bare'?'barely above BEP':q2val==='at'?'exactly at BEP':q2val==='below'?'below BEP':'(no answer)'}
+    ];
+    // Reveal correct/wrong
+    var q1grp=document.getElementById('q1-group');
+    if(q1grp) q1grp.querySelectorAll('.mc-opt').forEach(function(o){
+      var radio=o.querySelector('input[type=radio]');if(!radio)return;
+      if(parseInt(radio.value)===correctNewBE){o.classList.add('correct-reveal');o.insertAdjacentHTML('beforeend','<span class="sr-only"> (Correct answer)</span>');}
+      else if(radio.checked){o.classList.add('wrong-reveal');o.insertAdjacentHTML('beforeend','<span class="sr-only"> (Your answer — incorrect)</span>');}
+    });
+    var q2grp=document.getElementById('q2-group');
+    if(q2grp) q2grp.querySelectorAll('.mc-opt').forEach(function(o){
+      var radio=o.querySelector('input[type=radio]');if(!radio)return;
+      if(radio.value==='safe'){o.classList.add('correct-reveal');o.insertAdjacentHTML('beforeend','<span class="sr-only"> (Correct answer)</span>');}
+      else if(radio.checked){o.classList.add('wrong-reveal');o.insertAdjacentHTML('beforeend','<span class="sr-only"> (Your answer — incorrect)</span>');}
+    });
+    var newFCdisp=newFCval.toLocaleString();
+    fbh=mkFb(q1OK&&q2OK,'Break-Even Analysis',
+      '<strong>Q1 \u2014 New BEP after rent increase:</strong><br>'+
+      'New FC = $'+b.fc.toLocaleString()+' + $'+rentInc.toLocaleString()+' = <strong>$'+newFCdisp+'</strong><br>'+
+      'New BEP = $'+newFCdisp+' \u00f7 $'+cm.toFixed(2)+' CM = <strong>'+correctNewBE+' units</strong><br>'+
+      'Every time fixed costs rise, the break-even point moves up \u2014 you need more sales just to cover the new cost structure.<br><br>'+
+      '<strong>Q2 \u2014 Strongest strategic target:</strong><br>'+
+      'Targeting <strong>'+tSafe+' units</strong> (30% above BEP) is the strongest plan. It provides a meaningful profit buffer, meaning sales can dip somewhat before you fall into a loss. '+
+      'Targeting exactly at BEP means <em>any</em> shortfall results in a loss. Targeting below BEP guarantees a loss from the start.',
+      'New BEP = $'+newFCdisp+' \u00f7 $'+cm.toFixed(2)+' = '+correctNewBE+' units');
+
+  }else if(idx===2){
+    var rU=b.tpUnits, rS=b.tpSales;
+    var iTU=parseInt(document.getElementById('i2a').value)||0;
+    var iTS=parseInt(document.getElementById('i2b').value)||0;
+    var iC=document.getElementById('i2c').value;
+    var uOK=Math.abs(iTU-rU)<=3,s2OK=Math.abs(iTS-rS)<=25;
+    pts=(uOK?35:0)+(s2OK?35:0)+(iC?30:0);
+    profR=iC==='stretch'?(b.tp*1.4):(iC==='yes'?b.tp:b.tp*0.5);
+    savedDecTitle='The Goal: Hit Your Profit Target';
+    savedScenario='<strong>'+b.name+'</strong> profit target: <strong>$'+b.tp.toLocaleString()+'</strong>.';
+    savedAnswers=[{label:'Step 1: Required units for $'+b.tp.toLocaleString()+' profit',value:iTU+' units'},{label:'Step 2: Required sales in dollars',value:'$'+iTS.toLocaleString()},{label:'Step 3: Commitment',value:iC==='yes'?'Pursue $'+b.tp.toLocaleString():iC==='stretch'?'Stretch for higher goal':'Lower conservative target'}];
+    fbh=mkFb(uOK&&s2OK,'Target Profit',
+      'Required units = ($'+b.fc.toLocaleString()+' + $'+b.tp.toLocaleString()+') \u00f7 $'+cm.toFixed(2)+' = <strong>'+rU+' units</strong><br>Required sales = ($'+b.fc.toLocaleString()+' + $'+b.tp.toLocaleString()+') \u00f7 '+(cmr*100).toFixed(1)+'% = <strong>$'+rS.toLocaleString()+'</strong>',
+      '('+b.fc+' + '+b.tp+') \u00f7 '+cm.toFixed(2)+' = '+rU+' units');
+
+  }else if(idx===3){
+    var aU2=b.aU, mosU=b.mosU, mosD=b.mosD;
+    var iMU=parseInt(document.getElementById('i3a').value)||0;
+    var iMD=parseInt(document.getElementById('i3b').value)||0;
+    var iH=document.getElementById('i3c').value;
+    var muOK=Math.abs(iMU-mosU)<=2,mdOK=Math.abs(iMD-mosD)<=25;
+    var hireBreak=b.hireBreak, hireGood=b.hireGood;
+    pts=(muOK?35:0)+(mdOK?35:0)+(iH?(iH===(hireGood?'yes':'no')?30:15):0);
+    profR=aU2*cm-b.fc-(iH==='yes'?b.r3_hire:0);
+    savedDecTitle='The Analysis: Margin of Safety';
+    savedScenario='<strong>'+b.name+'</strong> sold <strong>'+aU2+' units</strong> \u2014 '+Math.round(b.r3_pct*100)+'% above BEP. Considering hiring for <strong>$'+b.r3_hire.toLocaleString()+'/mo</strong>.';
+    savedAnswers=[{label:'Step 1: MOS in units',value:iMU+' units'},{label:'Step 2: MOS in dollars',value:'$'+iMD.toLocaleString()},{label:'Step 3: Hire decision',value:iH==='yes'?'Yes \u2014 hire':'No \u2014 stay lean'}];
+    fbh=mkFb(muOK&&mdOK,'Margin of Safety',
+      'Actual units = '+aU2+' ('+Math.round(b.r3_pct*100)+'% above BEP of '+be+')<br>MOS (units) = '+aU2+' \u2212 '+be+' = <strong>'+mosU+' units</strong><br>MOS ($) = '+mosU+' \u00d7 $'+b.price.toFixed(2)+' = <strong>$'+mosD.toLocaleString()+'</strong><br><br>'+
+      'The hire adds $'+b.r3_hire.toLocaleString()+'/mo, requiring '+hireBreak+' extra units to break even on it.<br>'+
+      (hireGood?'MOS of '+mosU+' units <strong>exceeds that threshold</strong> \u2014 hire is reasonable.':'MOS of '+mosU+' units <strong>is below that threshold</strong> \u2014 staying lean is safer.'),
+      aU2+' \u2212 '+be+' = '+mosU+' unit safety buffer');
+
+  }else{
+    var r4d=G._r4;
+    var iOA=parseFloat(document.getElementById('i4a').value)||0;
+    var iOB=parseFloat(document.getElementById('i4b').value)||0;
+    var iCh=document.getElementById('i4c').value;
+    var aOK2=Math.abs(iOA-r4d.dolA)<0.4,bOK2=Math.abs(iOB-r4d.dolB)<0.4;
+    pts=(aOK2?30:0)+(bOK2?30:0)+(iCh===r4d.safer?40:10);
+    profR=Math.max(r4d.noiA,r4d.noiB);
+    savedDecTitle='The Decision: Choose a Cost Structure';
+    savedScenario='<strong>'+b.name+'</strong> expanding. Option A = equipment. Option B = labor. Same profit at <strong>'+r4d.r4.qty+' units</strong>.';
+    savedAnswers=[{label:'Step 1: DOL for Option A',value:iOA.toFixed(2)},{label:'Step 2: DOL for Option B',value:iOB.toFixed(2)},{label:'Step 3: Safer structure',value:iCh==='A'?'Option A \u2014 Equipment':'Option B \u2014 Labor'}];
+    fbh=mkFb(aOK2&&bOK2&&iCh===r4d.safer,'Operating Leverage',
+      '<strong>Option A:</strong> CM=$'+r4d.cmA.toFixed(2)+' \u00d7 '+r4d.r4.qty+'=$'+r4d.tcmA.toLocaleString()+' | NOI=$'+r4d.noiA.toLocaleString()+' \u2192 DOL=<strong>'+r4d.dolA.toFixed(1)+'</strong><br>'+
+      '<strong>Option B:</strong> CM=$'+r4d.cmB.toFixed(2)+' \u00d7 '+r4d.r4.qty+'=$'+r4d.tcmB.toLocaleString()+' | NOI=$'+r4d.noiB.toLocaleString()+' \u2192 DOL=<strong>'+r4d.dolB.toFixed(1)+'</strong><br><br>'+
+      'Higher DOL = profits swing more when sales change. For uncertain demand, <strong>Option '+r4d.safer+' is safer</strong> (lower leverage = more stable profit).',
+      'A: '+r4d.tcmA.toLocaleString()+'\u00f7'+r4d.noiA.toLocaleString()+'='+r4d.dolA.toFixed(1)+'  |  B: '+r4d.tcmB.toLocaleString()+'\u00f7'+r4d.noiB.toLocaleString()+'='+r4d.dolB.toFixed(1));
+  }
+
+  // Save history
+  G.history[idx]={pts:pts,concept:RC[idx],title:RT[idx],desc:RD[idx],formulas:RF[idx],decisionTitle:savedDecTitle,scenario:savedScenario,answers:savedAnswers,feedback:fbh};
+
+  G.score+=pts;G.profit+=profR;G.res.push({pts:pts,max:100});
+  G.round=idx+1;
+  document.getElementById('hs').textContent=G.score;
+  document.getElementById('hp').textContent='$'+Math.round(G.profit).toLocaleString();
+  updSide();updDots();
+
+  document.getElementById('dc').querySelectorAll('input,select,button').forEach(function(e){e.disabled=true;});
+  var mn=document.getElementById('ma');
+  var fd=document.createElement('div');fd.innerHTML=fbh;mn.appendChild(fd);
+  var nb=document.createElement('div');nb.style.cssText='display:flex;gap:12px;padding-bottom:40px;';
+  nb.innerHTML=idx<4?'<button class="btn" id="next-btn" onclick="loadRound('+(idx+1)+')">Next Round &#8594;</button>':'<button class="btn" id="next-btn" onclick="showResults()">See Final Results &#8594;</button>';
+  mn.appendChild(nb);
+  nb.scrollIntoView({behavior:'smooth',block:'end'});
+  // Move keyboard focus to the next-round button so keyboard users don't have to Tab to find it
+  setTimeout(function(){
+    var nextBtn=document.getElementById('next-btn');
+    if(nextBtn) nextBtn.focus();
+  },350); // slight delay lets scroll settle first
+}
+
+function mkFb(ok,concept,body,math){
+  return '<div class="fb '+(ok?'ok':'no')+' anim" style="animation-delay:.1s" role="alert">'+
+    '<div class="fbh"><span class="fbi" aria-hidden="true">'+(ok?'\u2705':'\u{1F4DA}')+'</span>'+
+    '<span class="fbt">'+(ok?'Great work!':'Review: '+concept)+'</span></div>'+
+    '<div class="fbb">'+body+'</div>'+(math?'<div class="fbm">'+math+'</div>':'')+
+    '</div>';
+}
+
+function updSide(){
+  var b=G.biz;if(!b)return;
+  var cm=b.price-b.vc,cmr=cm/b.price,be=Math.ceil(b.fc/cm),bes=Math.round(b.fc/cmr);
+  document.getElementById('mp').textContent='$'+b.price.toFixed(2);
+  document.getElementById('mv').textContent='$'+b.vc.toFixed(2);
+  document.getElementById('mf').textContent='$'+b.fc.toLocaleString();
+  document.getElementById('mcm').textContent='$'+cm.toFixed(2);
+  document.getElementById('mcmr').textContent=(cmr*100).toFixed(1)+'%';
+  document.getElementById('mbe').textContent=be+' units';
+  document.getElementById('mbes').textContent='$'+bes.toLocaleString();
+  var pe=document.getElementById('mpr');
+  pe.textContent='$'+Math.round(G.profit).toLocaleString();
+  pe.className='vl '+(G.profit>=0?'g':'r');
+}
+
+function showResults(){
+  var pct=Math.round((G.score/500)*100);
+  var scaled=SC.toScale(G.score);
+  var prev=SC.getPrev();
+  var best=Math.max(G.score,prev);
+  var bestScaled=SC.toScale(best);
+
+  document.getElementById('fscore').textContent=G.score;
+  document.getElementById('fscaled').textContent=bestScaled;
+  document.getElementById('rname').textContent=G.name;
+
+  // Show best-score note if a previous higher score exists
+  var noteEl=document.getElementById('fbest-note');
+  if(prev>G.score){
+    noteEl.textContent='Best: '+SC.toScale(prev)+'/100 from a previous attempt';
+    noteEl.style.color='var(--a2)';
+  } else if(prev>0&&prev===G.score){
+    noteEl.textContent='Matches your previous best';
+    noteEl.style.color='var(--label)';
+  } else if(prev>0){
+    noteEl.textContent='New best! Previous: '+SC.toScale(prev)+'/100';
+    noteEl.style.color='var(--ok)';
+  } else {
+    noteEl.textContent='';
+  }
+
+  var t=pct>=80?'\u{1F3C6} Excellent Work!':pct>=60?'\u{1F44D} Good Effort!':'\u{1F4D6} Keep Practicing!';
+  var m=pct>=80?'Strong work, '+G.name+'! You demonstrated solid CVP reasoning across all five rounds.'
+    :pct>=60?'Good effort, '+G.name+'! Review the rounds you missed and try another business to reinforce the concepts.'
+    :'Keep at it, '+G.name+'! Review your notes and try again with a different business.';
+  document.getElementById('rtitle').textContent=t;
+  document.getElementById('rmsg').textContent=m;
+
+  var concepts=['CM & CM Ratio','Break-Even','Target Profit','Margin of Safety','Operating Leverage'];
+  var sg=document.getElementById('sgrid');sg.innerHTML='';
+  G.res.forEach(function(r,i){
+    var p=Math.round((r.pts/r.max)*100);
+    var c=document.createElement('div');c.className='sc2';
+    c.innerHTML='<div class="sl">Round '+(i+1)+' \u00b7 '+concepts[i]+'</div>'+
+      '<div class="sv" style="color:'+(p>=70?'var(--ok)':p>=40?'var(--acc)':'var(--red)')+'">'+r.pts+' / '+r.max+' pts</div>';
+    sg.appendChild(c);
+  });
+  showScreen('results');
+  // Persist intermediate best in SCORM (no LMSFinish yet — student hasn't submitted)
+  try{localStorage.setItem('cvp-best-raw',best);}catch(e){}
+}
+
+function finish(){
+  downloadPNG(); // auto-download scorecard
+  setTimeout(function(){ SC.done(G.score); },400); // slight delay so PNG triggers first
+}
+
+function restart(){
+  // Regenerate session numbers for a fresh play
+  SESSION_BIZ=null;
+  for(var attempt=0;attempt<30;attempt++){SESSION_BIZ=generateAllBiz();if(SESSION_BIZ)break;}
+  var nm=G.name;
+  G={name:nm,bid:null,biz:null,round:0,score:0,profit:0,res:[],history:[],reviewing:false,_r4:null};
+  document.querySelectorAll('.scc').forEach(function(c){c.classList.remove('sel');c.setAttribute('aria-checked','false');c.setAttribute('tabindex','-1');});
+  document.querySelectorAll('.scc')[0].setAttribute('tabindex','0');
+  document.getElementById('sname').value=nm;
+  document.getElementById('gobtn').disabled=true;
+  showScreen('intro');
+}
+
+// ── PNG SCORECARD GENERATOR ──
+function downloadPNG(){
+  var W=680, H=420;
+  var canvas=document.createElement('canvas');
+  var dpr=window.devicePixelRatio||2;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  // ── Background ──
+  ctx.fillStyle='#1e2640';
+  ctx.fillRect(0,0,W,H);
+
+  // Top accent bar
+  ctx.fillStyle='#f5c542';
+  ctx.fillRect(0,0,W,6);
+
+  // ── Header section ──
+  ctx.fillStyle='#f5c542';
+  ctx.font='bold 13px Arial,sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText('CVP BUSINESS SIMULATION', 32, 38);
+
+  // Student name
+  ctx.fillStyle='#f0f2f8';
+  ctx.font='bold 22px Arial,sans-serif';
+  ctx.fillText(G.name, 32, 68);
+
+  // Business badge
+  var bizName=G.biz?G.biz.name:'Unknown Business';
+  var bizEmojis={taco:'\uD83C\uDF2E',tshirt:'\uD83D\uDC55',coffee:'\u2615',candle:'\uD83D\uDD6F'};
+  var bizEmoji=bizEmojis[G.bid]||'\uD83C\uDFE2';
+  ctx.fillStyle='#323d62';
+  roundRect(ctx,32,80,220,32,8);
+  ctx.fillStyle='#3ecfb2';
+  ctx.font='bold 13px Arial,sans-serif';
+  ctx.fillText(bizEmoji+' '+bizName, 42, 101);
+
+  // Score ring (right side)
+  var cx=W-90, cy=80, r=54;
+  // ring background
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle='#28304f';ctx.fill();
+  ctx.strokeStyle='#f5c542';ctx.lineWidth=5;ctx.stroke();
+
+  // Score text
+  ctx.fillStyle='#f5c542';
+  ctx.font='bold 28px Arial,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText(G.score,cx,cy+5);
+  ctx.fillStyle='#c8ccdc';
+  ctx.font='11px Arial,sans-serif';
+  ctx.fillText('/ 500 pts',cx,cy+22);
+
+  // Canvas grade
+  var best=Math.max(G.score,SC.getPrev());
+  var scaled=SC.toScale(best);
+  ctx.fillStyle='#c8ccdc';
+  ctx.font='11px Arial,sans-serif';
+  ctx.fillText('Canvas: '+scaled+'/100',cx,cy-38);
+
+  // ── Divider ──
+  ctx.strokeStyle='#424f7a';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(32,128);ctx.lineTo(W-32,128);ctx.stroke();
+
+  // ── Round score cards ──
+  var concepts=['CM & CM Ratio','Break-Even','Target Profit','Margin of Safety','Op. Leverage'];
+  var cardW=(W-64-16)/5; // 5 cards with 4 gaps of 4px
+  var cardH=180;
+  var cardY=142;
+
+  G.res.forEach(function(r,i){
+    var x=32+i*(cardW+4);
+    var pct2=Math.round((r.pts/r.max)*100);
+    var barColor=pct2>=70?'#4ade80':pct2>=40?'#f5c542':'#ff6b6b';
+
+    // Card background
+    ctx.fillStyle='#28304f';
+    roundRect(ctx,x,cardY,cardW,cardH,8);
+
+    // Round number
+    ctx.fillStyle='#3ecfb2';
+    ctx.font='bold 11px Arial,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('R'+(i+1),x+cardW/2,cardY+18);
+
+    // Concept name (wrap at ~12 chars)
+    ctx.fillStyle='#c8ccdc';
+    ctx.font='10px Arial,sans-serif';
+    var words=concepts[i].split(' ');
+    var line1=words[0],line2=words.slice(1).join(' ');
+    ctx.fillText(line1,x+cardW/2,cardY+33);
+    if(line2) ctx.fillText(line2,x+cardW/2,cardY+45);
+
+    // Points
+    ctx.fillStyle=barColor;
+    ctx.font='bold 20px Arial,sans-serif';
+    ctx.fillText(r.pts,x+cardW/2,cardY+90);
+    ctx.fillStyle='#b8bdd4';
+    ctx.font='10px Arial,sans-serif';
+    ctx.fillText('/ 100',x+cardW/2,cardY+106);
+
+    // Progress bar background
+    var bx=x+8, bw=cardW-16, bh=10, by=cardY+118;
+    ctx.fillStyle='#424f7a';
+    roundRect(ctx,bx,by,bw,bh,5);
+    // Progress bar fill
+    ctx.fillStyle=barColor;
+    roundRect(ctx,bx,by,Math.round(bw*(r.pts/r.max)),bh,5);
+
+    // Percentage
+    ctx.fillStyle=barColor;
+    ctx.font='bold 12px Arial,sans-serif';
+    ctx.fillText(pct2+'%',x+cardW/2,cardY+150);
+  });
+
+  // ── Footer ──
+  ctx.fillStyle='#424f7a';
+  ctx.fillRect(0,H-36,W,36);
+  ctx.fillStyle='#b8bdd4';
+  ctx.font='11px Arial,sans-serif';
+  ctx.textAlign='left';
+  var now=new Date();
+  var dateStr=now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  ctx.fillText('Completed '+dateStr+' \u00b7 CVP Business Simulation',32,H-14);
+  ctx.textAlign='right';
+  ctx.fillStyle='#f5c542';
+  ctx.font='bold 11px Arial,sans-serif';
+  ctx.fillText('CVP Business Simulation',W-32,H-14);
+
+  // ── Download ──
+  var slug=(G.biz?G.biz.name:'business').replace(/[^a-z0-9]/gi,'-').toLowerCase();
+  var filename='cvp-scorecard-'+slug+'.png';
+  canvas.toBlob(function(blob){
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},2000);
+  },'image/png');
+}
+
+// Helper: draw a rounded rectangle (fill only)
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();ctx.fill();
+}
+</script>
+</body>
+</html>
